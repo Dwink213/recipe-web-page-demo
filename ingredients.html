@@ -13,7 +13,7 @@
               Kata brief bullet 2: "doesn't need to have any interactive elements."
     DISPLAYS: recipe title, yield, and a plain list of ingredient strings.
     DATA:     fetches data/recipes.json at runtime (reads ?id= from the URL).
-    IN  (linked from): index.html
+    IN  (linked from): index.html, order.html (back)
     OUT (links to):    index.html (back), order.html, data.html
     MODULES:  none — display only, no parsing or flags here (those live on order.html)
   -->
@@ -34,8 +34,12 @@
       const recipes = await (await fetch("data/recipes.json")).json();
       const recipe = recipes.find((r) => r.id === id);
 
-      if (!recipe) {
-        content.innerHTML = `<p class="error">Recipe not found: ${esc(id ?? "(no id given)")}.</p>`;
+      if (!id) {
+        content.innerHTML = `<p class="error">No recipe selected.</p>
+          <p><a class="back" href="index.html">Browse all recipes &rarr;</a></p>`;
+      } else if (!recipe) {
+        content.innerHTML = `<p class="error">Recipe not found: ${esc(id)}.</p>
+          <p><a class="back" href="index.html">Browse all recipes &rarr;</a></p>`;
       } else {
         const eid = encodeURIComponent(recipe.id);
         content.innerHTML = `

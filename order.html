@@ -15,9 +15,10 @@
               with a caption), a running total, and pending/approved status.
     DATA:     fetches data/recipes.json + data/procurement.json (reads ?id= and
               optional ?servings= from the URL).
-    IN  (linked from): ingredients.html
-    OUT (links to):    index.html (back), ingredients.html, data.html
+    IN  (linked from): index.html (Advanced nav → recipe picker), ingredients.html
+    OUT (links to):    index.html (back), ingredients.html, data.html, order.html (picker rows)
     MODULES:  js/convert.js (buildOrder, convertToBuyUnit)
+    NO ?id=:  shows a recipe picker so the order builder is reachable from the index.
   -->
   <main>
     <a class="back" href="index.html">&larr; All recipes</a>
@@ -76,8 +77,23 @@
     // WHAT/WHY: sum every line's cost for the order total (skips unpriced lines).
     const totalNow = () => order.lines.reduce((s, l) => s + (l.lineCost || 0), 0);
 
-    if (!recipe) {
-      content.innerHTML = `<p class="error">Recipe not found: ${esc(id ?? "(no id given)")}.</p>`;
+    if (!id) {
+      // WHAT: no recipe chosen — show a picker of every recipe.
+      // WHY:  the index has no single-recipe context, so the order builder needs
+      //       its own entry point to be reachable from the index's Advanced nav.
+      const recipes = await (await fetch("data/recipes.json")).json();
+      content.innerHTML = `
+        <h1>Build an order</h1>
+        <p class="meta">Pick a recipe to scale, convert to procurement units, and price.</p>
+        <ul class="recipes">
+          ${recipes.map((r) => `
+            <li><a href="order.html?id=${encodeURIComponent(r.id)}">
+              <span>${esc(r.title)}</span><span class="yield">serves ${r.yield}</span>
+            </a></li>`).join("")}
+        </ul>
+        <nav><a href="index.html">&larr; All recipes</a> &middot; <a href="data.html">data &amp; conversion logic</a></nav>`;
+    } else if (!recipe) {
+      content.innerHTML = `<p class="error">Recipe not found: ${esc(id)}.</p>`;
     } else {
       render(Number(params.get("servings")) || recipe.yield);
     }
