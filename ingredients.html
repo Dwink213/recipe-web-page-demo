@@ -7,17 +7,25 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!--
+    PAGE:     ingredients.html
+    WHAT:     "The page for the recipe" — lists the ingredients used in it.
+              Kata brief bullet 2: "doesn't need to have any interactive elements."
+    DISPLAYS: recipe title, yield, and a plain list of ingredient strings.
+    DATA:     fetches data/recipes.json at runtime (reads ?id= from the URL).
+    IN  (linked from): index.html
+    OUT (links to):    index.html (back), order.html, data.html
+    MODULES:  none — display only, no parsing or flags here (those live on order.html)
+  -->
   <main>
     <a class="back" href="index.html">&larr; All recipes</a>
     <div id="content"></div>
   </main>
 
-  <!--
-    "A page listing the ingredients used in the recipe. This page doesn't need
-    to have any interactive elements." (Kata brief, bullet 2)
-    Plain listing — no flags, no interactive controls.
-  -->
   <script type="module">
+    // WHAT: find the recipe by its ?id= and render its ingredient strings as-is.
+    // WHY:  the brief wants a plain listing; keeping it display-only (no flags,
+    //       no controls) honors "no interactive elements" and stays simple.
     const content = document.getElementById("content");
     const id = new URLSearchParams(location.search).get("id");
     const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");

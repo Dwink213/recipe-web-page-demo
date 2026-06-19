@@ -1,17 +1,24 @@
-// convert.js — scaling + procurement conversion + order build (ES module)
+// convert.js — scaling + procurement conversion + order build (ES module).
 //
-// Turns a parsed recipe into a procurement order: scale every ingredient to the
-// target servings, convert recipe grams into the unit the item is actually
-// bought in, attach an illustrative line cost, and surface every ambiguity as a
-// flag. Nothing here decides anything a human shouldn't — bundled lines split
-// into a flagged placeholder that requires approval.
+// Turns a parsed recipe into a priced procurement order: scale every ingredient
+// to the target servings, convert recipe grams into the unit the item is bought
+// in, and attach an illustrative line cost. The single source of conversion
+// truth for the app. Invariants: never throws — an unparseable line, a missing
+// quantity, or a missing procurement match is carried as a flagged line instead.
+// Bundled lines (salt and pepper) are split even-by-weight into two clean,
+// separately-priced lines; the order page captions and lets a human adjust them.
 
 import { parseIngredient } from "./parse.js";
 
 /**
+ * WHAT: Build the full list of priced order lines for a recipe at a target
+ *       serving count.
+ * WHY:  The order page needs one call that does scaling + procurement
+ *       conversion + pricing, so that logic lives here and not in the UI.
  * @param {{yield:number, ingredients:string[]}} recipe
- * @param {number} targetServings
- * @param {Record<string, any>} procurement
+ * @param {number} targetServings  servings to scale to (page defaults to yield)
+ * @param {Record<string, any>} procurement  the procurement table, keyed by name
+ * @returns {{scale:number, targetServings:number, recipeYield:number, lines:object[]}}
  */
 export function buildOrder(recipe, targetServings, procurement) {
   const scale = targetServings / recipe.yield;
@@ -65,7 +72,11 @@ export function buildOrder(recipe, targetServings, procurement) {
   return { scale, targetServings, recipeYield: recipe.yield, lines };
 }
 
-/** Build one priced order line from scaled grams and a procurement entry. */
+/**
+ * WHAT: Build one priced order line from scaled grams + a procurement entry.
+ * WHY:  Pricing and unit-label assembly is identical for every mapped line
+ *       (and each half of a split), so it lives in one helper.
+ */
 function makeLine(name, grams, p, note, flags) {
   if (!p) {
     return {
@@ -91,8 +102,13 @@ function makeLine(name, grams, p, note, flags) {
 }
 
 /**
- * Convert scaled grams into the unit the item is bought in.
- *   each -> ceil (no fractional eggs)   ml -> round to 0.1   g -> grams as-is
+ * WHAT: Convert scaled grams into the quantity in the item's buy unit.
+ *       each -> ceil (no fractional eggs)   ml -> round to 0.1   g -> grams as-is
+ * WHY:  Recipe weight isn't how things are purchased; countables must round up
+ *       (you can't order 2.1 eggs), liquids convert by density to volume.
+ * @param {number} grams  scaled recipe weight
+ * @param {{buyUnit:string, gramsPerUnit?:number, gramsPerMl?:number}} p
+ * @returns {number} quantity in the buy unit
  */
 export function convertToBuyUnit(grams, p) {
   if (p.buyUnit === "each") return Math.ceil(grams / p.gramsPerUnit);

@@ -7,6 +7,15 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!--
+    PAGE:     index.html
+    WHAT:     Landing page — the recipe list (the kata's required deliverable).
+    DISPLAYS: every recipe title + serving count, each a link to its ingredients.
+    DATA:     fetches data/recipes.json at runtime.
+    IN  (linked from): — (entry point)
+    OUT (links to):    ingredients.html (per recipe), data.html
+    MODULES:  none
+  -->
   <main>
     <h1>Recipes</h1>
     <p class="sub">Stored as JSON in the repo, fetched at runtime. Click a recipe to see its ingredients.</p>
@@ -15,6 +24,9 @@
   </main>
 
   <script type="module">
+    // WHAT: fetch the recipe list and render each as a link to its ingredients.
+    // WHY:  the back end is a static JSON file; the list is built client-side so
+    //       there is no server or build step.
     const list = document.getElementById("list");
     try {
       const recipes = await (await fetch("data/recipes.json")).json();

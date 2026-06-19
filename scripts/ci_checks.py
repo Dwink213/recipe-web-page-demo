@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """ci_checks.py - lightweight validation gate for the recipe web page demo.
 
-Modeled on the AWACS site CI gate, trimmed to checks that make sense for a
-single-page static demo. Each check appends human-readable strings to a shared
-`errors` list; a non-empty list means the gate fails (exit 1).
+WHAT: runs a few cheap checks over the repo (page present, not empty, no leaked
+      secrets, data obeys the kata rules) and exits non-zero if any fail.
+WHY:  it runs in CI on every push/PR AND locally before pushing, so the same
+      command catches a broken or non-compliant deploy in milliseconds.
 
-Run locally with:  python3 scripts/ci_checks.py
+Each check appends human-readable strings to a shared `errors` list; a non-empty
+list means the gate fails (exit 1). Run locally:  python3 scripts/ci_checks.py
 """
 import json
 import re
@@ -16,13 +18,15 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def check_index_exists(errors):
-    """The deploy serves repo root, so index.html must exist there."""
+    """WHAT: assert index.html is at the repo root. WHY: the SWA serves the root,
+    so a missing/moved index.html means a blank site."""
     if not (ROOT / "index.html").is_file():
         errors.append("index.html is missing from the repo root.")
 
 
 def check_index_not_empty(errors):
-    """A blank page deploys 'successfully' but is a broken demo - catch it."""
+    """WHAT: assert index.html has real HTML content. WHY: a blank page deploys
+    'successfully' but is a broken demo - catch it before it ships."""
     index = ROOT / "index.html"
     if not index.is_file():
         return  # already reported by check_index_exists
@@ -32,10 +36,10 @@ def check_index_not_empty(errors):
 
 
 def check_no_leaked_secrets(errors):
-    """Scan tracked text files for obvious credential patterns.
+    """WHAT: scan text files for obvious credential patterns. WHY: the repo is
+    public, so a copy-pasted token must never ship to the live site.
 
-    This is a coarse safety net, not a full secret scanner. It looks for a few
-    high-signal shapes so a copy-pasted token never ships to a public site.
+    A coarse safety net, not a full secret scanner — a few high-signal shapes.
     """
     patterns = {
         "Azure SWA deployment token assignment": re.compile(
@@ -62,11 +66,10 @@ def check_no_leaked_secrets(errors):
 
 
 def check_data_meets_kata_rules(errors):
-    """Enforce the Kata brief's data rules as a real gate (not just convention).
-
-    The brief is the contract. These assertions mirror, in CI, the same rules
-    the order page enforces at runtime, so the data files cannot drift out of
-    compliance through an unreviewed PR. Each rule traces to the brief.
+    """WHAT: assert data/recipes.json + data/procurement.json obey the kata's data
+    rules (recipe shape + unique slug ids, illustrative price labels, and the
+    bundled salt/pepper modeling). WHY: the brief is the contract, so the data
+    can't drift out of compliance through an unreviewed PR. See docs/kata-rules.md.
     """
     data = ROOT / "data"
     recipes_path, proc_path = data / "recipes.json", data / "procurement.json"

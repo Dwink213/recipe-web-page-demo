@@ -7,6 +7,18 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!--
+    PAGE:     order.html  (advanced — beyond the kata brief)
+    WHAT:     Order builder for one recipe — scale, convert to procurement units,
+              price (illustrative), with editable ambiguous lines and an Approve step.
+    DISPLAYS: servings control, one card per order line (salt/pepper split shown
+              with a caption), a running total, and pending/approved status.
+    DATA:     fetches data/recipes.json + data/procurement.json (reads ?id= and
+              optional ?servings= from the URL).
+    IN  (linked from): ingredients.html
+    OUT (links to):    index.html (back), ingredients.html, data.html
+    MODULES:  js/convert.js (buildOrder, convertToBuyUnit)
+  -->
   <main>
     <a class="back" href="index.html">&larr; All recipes</a>
     <div id="content"></div>
@@ -40,6 +52,9 @@
     // data-quality flag — i.e. anything ambiguous a human might want to correct.
     const editable = (l) => !!l.bundle || (l.flags && l.flags.length > 0);
 
+    // WHAT: recompute a line's buy-unit quantity and cost from its current grams.
+    // WHY:  editing an ambiguous line must reprice it live; the conversion math
+    //       itself stays in convert.js (convertToBuyUnit) — this only re-applies it.
     function reprice(l) {
       const p = procurement[l.name];
       if (!p) { l.qty = undefined; l.lineCost = undefined; return; }
@@ -48,6 +63,8 @@
       l.lineCost = l.qty * p.pricePerBuyUnit;
     }
 
+    // WHAT: the right-hand numbers cell for a line: scaled grams -> qty -> cost.
+    // WHY:  rendered on first paint and again on every live edit, so it's one fn.
     function numsHtml(l) {
       if (l.qty !== undefined && l.qty !== null) {
         return `${round1(l.grams)} g &rarr; ${l.qty} ${esc(l.buyUnitLabel)}<br>` +
@@ -56,6 +73,7 @@
       return l.grams !== null ? round1(l.grams) + " g" : "—";
     }
 
+    // WHAT/WHY: sum every line's cost for the order total (skips unpriced lines).
     const totalNow = () => order.lines.reduce((s, l) => s + (l.lineCost || 0), 0);
 
     if (!recipe) {
@@ -64,6 +82,9 @@
       render(Number(params.get("servings")) || recipe.yield);
     }
 
+    // WHAT: render one order-line card; ambiguous lines get an editable grams input.
+    // WHY:  the user can correct an ambiguous amount (salt/pepper) inline; normal
+    //       lines are display-only. The input is hidden once the order is approved.
     function lineCard(l) {
       const note = l.note ? `<div class="note">(${esc(l.note)})</div>` : "";
       const editor = editable(l) && !approved
@@ -75,6 +96,10 @@
       </div>`;
     }
 
+    // WHAT: build the order at this serving count, paint the page, and wire the
+    //       servings control, Approve button, and per-line live-edit inputs.
+    // WHY:  a single render path keeps state (overrides, approved) and the DOM in
+    //       sync; edits update in place afterward so inputs don't lose focus.
     function render(servings) {
       order = buildOrder(recipe, servings, procurement);
       order.lines.forEach((l, i) => {
@@ -135,8 +160,10 @@
       });
       document.getElementById("approve").addEventListener("click", () => { approved = true; render(servings); });
 
-      // Live-edit a line's grams: reprice that line and the total in place,
-      // without re-rendering (so the input keeps focus).
+      // WHAT: live-edit a line's grams — reprice that line and the total in place,
+      //       without re-rendering, so the input keeps focus.
+      // WHY:  edits are intentionally independent; salt and pepper are NOT
+      //       reconciled back to the original bundled weight (illustrative demo).
       content.querySelectorAll(".qty-edit").forEach((inp) => {
         inp.addEventListener("input", () => {
           const idx = Number(inp.dataset.idx);

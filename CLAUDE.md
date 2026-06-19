@@ -13,7 +13,7 @@ A static, multi-page recipe app (vanilla HTML + ES-module JavaScript, no build s
 
 ## Architecture
 
-Four pages at the repo root, two ES modules in `/js`, three data files in `/data`. Pages link to each other with normal `<a>` and query strings (`recipe.html?id=chicken-stir-fry`) — no SPA router, no client-side routing.
+Four pages at the repo root, two ES modules in `/js`, three data files in `/data`. Pages link to each other with normal `<a>` and query strings (`ingredients.html?id=chicken-stir-fry`) — no SPA router, no client-side routing.
 
 Pages — clicking a recipe goes **straight to its ingredients** (no middle page); the advanced pages are linked from there, not required:
 - `index.html` — recipe list (the graded deliverable). Fetches `data/recipes.json`, links each title straight to `ingredients.html?id=`.
@@ -41,7 +41,7 @@ The only link between GitHub and Azure is the `AZURE_STATIC_WEB_APPS_API_TOKEN` 
 
 Recipe and price changes flow through `recipes.json` / `procurement.json` via PR — every change is reviewed before it ships. Two non-negotiables from the spec:
 - **Never edit the *meaning* of an ingredient line in `recipes.json`** — clean JSON syntax only. The parser does the structuring at runtime so the raw source stays auditable.
-- **Illustrative prices/conversions must be labeled everywhere; the salt/pepper even-split is a flagged placeholder, never committed as fact.** Nothing reads as "ordered" until the approval gate flips.
+- **Illustrative prices/conversions must be labeled everywhere.** The salt/pepper bundle is shown as two separately-priced, hand-editable lines with a caption — the even split is a neutral default, not a recommendation. Nothing reads as "ordered" until the `order.html` Approve step flips.
 
 `_intake/` holds the kata source-of-truth docs (brief + build spec). The app's live data is `/data`, not `_intake`.
 
@@ -51,7 +51,12 @@ Recipe and price changes flow through `recipes.json` / `procurement.json` via PR
 - **Switching to a framework with a build step (React/Vue/Vite/Next/Astro) requires editing `deploy.yml`:** set `skip_app_build: false`, point `app_location` at the source dir, and `output_location` at the build output dir. Otherwise raw source deploys instead of the built bundle.
 - **`check_no_leaked_secrets()` in `ci_checks.py` scans committed files** for `api_key=`/`secret=`/`password=` and the SWA token shape. Use repo secrets, never inline literals.
 - **Adding SPA client-side routing?** Add `staticwebapp.config.json` at the root with a navigation fallback to `/index.html`, or deep links 404.
-- **`check_recipe_quality()` in `ci_checks.py` is an intentional no-op with a TODO** — it's the designated spot to assert what a valid recipe page must contain (e.g. an `<h1>`, an ingredients section). Implement there if you want content gating.
+- **`check_data_meets_kata_rules()` in `ci_checks.py` is an enforced gate, not a no-op** — it fails the build on bad data (recipe shape, illustrative-price labels, bundled salt/pepper modeling). If you change `data/*.json`, expect this to catch a violation. (It replaced the original `check_recipe_quality()` TODO stub.)
+- **Keep the docs in sync with behavior.** `data/conversion-logic.md` renders live on `data.html`; `README.md` / this file / `docs/kata-rules.md` describe the app. A change to behavior that doesn't update these is a breadcrumb bug — see `docs/STYLE_GUIDE.md`.
+
+## Conventions (follow when editing)
+
+`docs/STYLE_GUIDE.md` is the standard. Every page opens with a `<!-- PAGE: … -->` header (WHAT / DISPLAYS / DATA / IN-links / OUT-links / MODULES); every function carries a `WHAT` + `WHY` comment. When you add or remove a cross-page link, update the `IN`/`OUT` lines on **both** pages. Behavior changes must update the docs that describe them in the same change (`data/conversion-logic.md` renders live on `data.html`; `README.md` / this file / `docs/kata-rules.md`).
 
 ## Azure environment
 

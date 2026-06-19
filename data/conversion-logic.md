@@ -20,18 +20,18 @@ To scale a recipe, multiply every ingredient by `targetServings / recipe.yield`,
 
 The gram-per-unit conversions and the prices in this build are placeholders, labeled illustrative everywhere they appear. Real values would come from the supplier catalog. We never let a placeholder render as if it were authoritative data.
 
-## 5. Salt and pepper: ambiguous, so it's suggested, not decided
+## 5. Salt and pepper: one line, two SKUs the kitchen prices differently
 
-The line "3g Salt and pepper (to taste)" is two distinct SKUs sharing one weight. You cannot order "3g of salt and pepper" as a single item, and the recipe doesn't say how to split it. The catalog reality is that salt and pepper are separate purchases at very different price points, and pepper costs many times what salt does, so a wrong split is a real money error.
+The line "3g Salt and pepper (to taste)" is two distinct SKUs sharing one weight. You cannot order "3g of salt and pepper" as a single item. Salt and pepper are separate purchases at very different price points — pepper costs many times what salt does — so the kitchen does not treat them as one line.
 
-The system does not guess silently. When this line is scaled, it splits into two separate order lines, salt and pepper, with an even split by weight as a neutral placeholder. Both lines are flagged and marked NEEDS APPROVAL. The even split is a starting point that forces a human to look, not a recommendation. Nothing is ordered until a person confirms or corrects the split.
+When this line is scaled, the system splits it into two separate order lines, salt and pepper, using an even split by weight as a neutral starting point. Each line is priced on its own, and either amount can be adjusted by hand on the order page. The even split is a default, not a recommendation — a caption on the order page explains why the two are separated.
 
-## 6. Nothing commits without human approval
+## 6. Nothing counts as ordered without human approval
 
-Every order on Page 2 renders in a pending state. Suggested and flagged lines are visibly marked. A single approval step is required before anything is treated as ordered. For facility procurement, where a wrong quantity costs real money, the system's job is to propose and surface doubt, and the human's job is to commit. The system never commits a number it guessed.
+Every order on Page 2 renders in a pending state and is not treated as placed until a person clicks Approve; changing the serving count returns it to pending. Prices and unit conversions are illustrative and labeled as such. The system's job is to scale, convert, and show the cost of every line — including each side of the salt/pepper split — and the human's job is to review and approve.
 
 ---
 
 ### Say-out-loud summary (the 20-second version)
 
-"I treat the input as untrusted and parse it before I compute. Recipe units aren't procurement units, so I model a conversion layer in one place. Scaling falls out of that for free. Where a line is ambiguous, like salt and pepper bundled together, I split it, pre-fill a neutral placeholder, flag it, and require human approval before it can be ordered. The system suggests and surfaces doubt. It never silently guesses a value into an order."
+"I treat the input as untrusted and parse it before I compute. Recipe units aren't procurement units, so I model a conversion layer in one place, and scaling falls out of that for free. Where one line bundles two SKUs, like salt and pepper, I split it even-by-weight into two separately-priced lines you can adjust by hand, because the kitchen doesn't treat them as equal. Prices are illustrative and labeled, and nothing counts as ordered until a human approves."

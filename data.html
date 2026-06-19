@@ -7,6 +7,17 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!--
+    PAGE:     data.html  (advanced — beyond the kata brief)
+    WHAT:     Self-documenting view — the data the app runs on next to the
+              plain-English logic, so the system explains itself.
+    DISPLAYS: pretty-printed recipes.json + procurement.json, and the rendered
+              data/conversion-logic.md.
+    DATA:     fetches data/recipes.json + data/procurement.json + conversion-logic.md.
+    IN  (linked from): index.html, ingredients.html, order.html
+    OUT (links to):    index.html
+    MODULES:  none (inline markdown renderer below)
+  -->
   <main class="wide">
     <a class="back" href="index.html">&larr; All recipes</a>
     <h1>Data &amp; conversion logic</h1>
@@ -25,8 +36,10 @@
   </main>
 
   <script type="module">
-    // Minimal, dependency-free Markdown -> HTML for conversion-logic.md:
-    // headings, hr, blockquote, lists, **bold**, `code`, paragraphs.
+    // WHAT: minimal Markdown -> HTML for conversion-logic.md (headings, hr,
+    //       blockquote, lists, **bold**, `code`, paragraphs).
+    // WHY:  Page 3 renders that doc, and a tiny renderer keeps the site
+    //       dependency-free — no CDN, which also avoids file:// fetch issues.
     function mdToHtml(md) {
       const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
       const inline = s => esc(s)
