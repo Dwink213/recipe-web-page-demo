@@ -4,21 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Recipe — Kata Demo</title>
-  <style>
-    :root { --ink:#2a2320; --accent:#c2410c; --line:#e7ddd1; --muted:#7a6f64; --bg:#fffaf3; --accent-soft:#fde7d6; }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family: ui-sans-serif, system-ui, Arial, sans-serif; color:var(--ink); background:var(--bg); line-height:1.6; }
-    main { max-width: 600px; margin:0 auto; padding:2rem 1.5rem; }
-    a.back { color:var(--accent); text-decoration:none; font-size:.9rem; }
-    h1 { margin:.5rem 0 .25rem; }
-    .yield { color:var(--muted); margin:0 0 1.5rem; }
-    h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 .5rem; }
-    ul.ing { list-style:none; padding:0; margin:0; }
-    ul.ing li { padding:.6rem .25rem; border-bottom:1px solid var(--line); }
-    nav.adv { margin-top:2rem; padding-top:1rem; border-top:1px solid var(--line); font-size:.9rem; color:var(--muted); }
-    nav.adv a { color:var(--accent); }
-    .error { color:#b91c1c; }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main>
@@ -29,8 +15,7 @@
   <!--
     "A page listing the ingredients used in the recipe. This page doesn't need
     to have any interactive elements." (Kata brief, bullet 2)
-    A plain listing of the recipe's ingredients — no data-quality flags, no
-    interactive controls. Those live on the advanced order page.
+    Plain listing — no flags, no interactive controls.
   -->
   <script type="module">
     const content = document.getElementById("content");
@@ -48,7 +33,7 @@
         content.innerHTML = `
           <h1>${esc(recipe.title)}</h1>
           <p class="yield">Yield: serves ${recipe.yield}</p>
-          <h2>Ingredients</h2>
+          <h2 class="label">Ingredients</h2>
           <ul class="ing">
             ${recipe.ingredients.map((i) => `<li>${esc(i)}</li>`).join("")}
           </ul>

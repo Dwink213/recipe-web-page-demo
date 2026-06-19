@@ -4,31 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Recipes — Kata Demo</title>
-  <style>
-    :root { --ink:#2a2320; --accent:#c2410c; --line:#e7ddd1; --muted:#7a6f64; --bg:#fffaf3; }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family: ui-sans-serif, system-ui, Arial, sans-serif; color:var(--ink); background:var(--bg); line-height:1.6; }
-    main { max-width: 640px; margin: 0 auto; padding: 2rem 1.5rem; }
-    h1 { margin:0 0 .25rem; }
-    .sub { color: var(--muted); margin: 0 0 2rem; }
-    ul.recipes { list-style:none; padding:0; margin:0; }
-    ul.recipes li { border:1px solid var(--line); border-radius:8px; margin-bottom:.75rem; }
-    ul.recipes a { display:flex; justify-content:space-between; align-items:center; padding:1rem 1.25rem; text-decoration:none; color:var(--ink); font-size:1.1rem; }
-    ul.recipes a:hover { background:#fff; }
-    .yield { color:var(--muted); font-size:.9rem; }
-    nav { margin-top:2.5rem; padding-top:1rem; border-top:1px solid var(--line); font-size:.9rem; }
-    nav a { color:var(--accent); }
-    .error { color:#b91c1c; }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main>
     <h1>Recipes</h1>
     <p class="sub">Stored as JSON in the repo, fetched at runtime. Click a recipe to see its ingredients.</p>
     <ul class="recipes" id="list"></ul>
-    <nav>
-      Advanced: <a href="data.html">data &amp; conversion logic</a>
-    </nav>
+    <nav>Advanced: <a href="data.html">data &amp; conversion logic</a></nav>
   </main>
 
   <script type="module">

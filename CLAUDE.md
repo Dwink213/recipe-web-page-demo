@@ -18,8 +18,10 @@ Four pages at the repo root, two ES modules in `/js`, three data files in `/data
 Pages — clicking a recipe goes **straight to its ingredients** (no middle page); the advanced pages are linked from there, not required:
 - `index.html` — recipe list (the graded deliverable). Fetches `data/recipes.json`, links each title straight to `ingredients.html?id=`.
 - `ingredients.html` — "the page for the recipe": a **plain list** of the recipe's ingredients (the raw strings), title, and yield, plus links to the advanced pages. Deliberately simple — no data-quality flags, no parser artifacts. **No interactive elements** in the listing (no button/input/form/handler) — that constraint is load-bearing; keep it display-only (plain nav `<a>`s are fine). There is intentionally no separate recipe-hub page.
-- `order.html` — (advanced) scale to target servings, convert to procurement units, illustrative pricing, and a simple pending→**approved** gate (re-scaling resets it). The `salt and pepper` line is shown as two even-split lines (salt, pepper) with a caption explaining the split — they cost very differently, so the kitchen orders them separately. No interactive split editor.
+- `order.html` — (advanced) scale to target servings, convert to procurement units, illustrative pricing, and a simple pending→**approved** gate (re-scaling resets it). Ambiguous lines — the `salt and pepper` split (shown as two lines with a caption) and any flagged line — get an editable grams input that live-reprices that line and the total in place (class `.qty-edit` + `data-idx`, updated without a full re-render so the input keeps focus). Don't reintroduce whitespace `id`s or per-keystroke re-render here — both were bugs.
 - `data.html` — (advanced) pretty-prints both JSON files and renders `data/conversion-logic.md` via a tiny inline markdown function (zero CDN dependencies).
+
+All pages share one stylesheet, **`styles.css`** (static asset, fetched once). Keep each page's `<head>` to a `<title>` + `<link rel="stylesheet" href="styles.css">` — don't re-inline per-page `<style>` blocks. Page-width variant: `<main class="wide">` (used by `data.html`).
 
 Modules (`/js`, faithful to the pseudocode in `_intake/01_build-spec.md`):
 - `parse.js` — `parseIngredient(raw)` turns `"100g large eggs"` into `{raw, amount, unit, name, note, flags}`. Always preserves `raw`; never throws.

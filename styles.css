@@ -1,0 +1,65 @@
+/* styles.css — shared across every page so each HTML <head> stays tiny.
+   Static asset: fetched once, cached across the site. */
+
+:root {
+  --ink:#2a2320; --accent:#c2410c; --accent-soft:#fde7d6; --line:#e7ddd1;
+  --muted:#7a6f64; --bg:#fffaf3; --code:#f5efe6;
+  --flag:#9a3412; --flagbg:#fde7d6;
+  --ok:#15803d; --okbg:#dcfce7; --pending:#92400e; --pendingbg:#fef3c7;
+}
+* { box-sizing: border-box; }
+body { margin:0; font-family: ui-sans-serif, system-ui, Arial, sans-serif; color:var(--ink); background:var(--bg); line-height:1.55; }
+main { max-width:720px; margin:0 auto; padding:2rem 1.5rem; }
+main.wide { max-width:900px; }
+a.back { color:var(--accent); text-decoration:none; font-size:.9rem; }
+h1 { margin:.5rem 0 .25rem; }
+.error { color:#b91c1c; }
+.note { color:var(--muted); font-style:italic; font-size:.85rem; }
+.illustrative { color:var(--muted); font-size:.72rem; }
+.yield { color:var(--muted); margin:0 0 1.5rem; }
+
+/* nav (shared) */
+nav, nav.adv { margin-top:2rem; padding-top:1rem; border-top:1px solid var(--line); font-size:.9rem; color:var(--muted); }
+nav a, nav.adv a { color:var(--accent); }
+
+/* index — recipe list */
+.sub { color:var(--muted); margin:0 0 2rem; }
+ul.recipes { list-style:none; padding:0; margin:0; }
+ul.recipes li { border:1px solid var(--line); border-radius:8px; margin-bottom:.75rem; }
+ul.recipes a { display:flex; justify-content:space-between; align-items:center; padding:1rem 1.25rem; text-decoration:none; color:var(--ink); font-size:1.1rem; }
+ul.recipes a:hover { background:#fff; }
+
+/* ingredients — plain listing */
+h2.label { font-size:1rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 .5rem; }
+ul.ing { list-style:none; padding:0; margin:0; }
+ul.ing li { padding:.6rem .25rem; border-bottom:1px solid var(--line); }
+
+/* order */
+.meta { color:var(--muted); margin:0 0 1rem; }
+.controls { display:flex; gap:.75rem; align-items:center; margin:1rem 0 1.25rem; flex-wrap:wrap; }
+.controls input { width:5rem; padding:.35rem .5rem; font-size:1rem; }
+.status { display:inline-block; padding:.2rem .7rem; border-radius:999px; font-size:.8rem; font-weight:700; letter-spacing:.03em; }
+.banner { padding:.75rem 1rem; border-radius:8px; margin:1rem 0; font-size:.9rem; border:1px solid transparent; }
+.status.pending, .banner.pending { background:var(--pendingbg); color:var(--pending); }
+.status.approved, .banner.approved { background:var(--okbg); color:var(--ok); }
+.banner.pending { border-color:#fcd34d; }
+.banner.approved { border-color:#86efac; }
+.line { display:flex; justify-content:space-between; gap:1rem; align-items:flex-start; padding:.6rem .85rem; border:1px solid var(--line); border-radius:8px; margin-bottom:.5rem; background:#fff; }
+.line .name { font-weight:600; }
+.line .nums { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; color:var(--muted); font-size:.9rem; }
+.line .nums .cost { color:var(--ink); font-weight:600; }
+.qty-edit { width:4.5rem; padding:.2rem .35rem; font-size:.9rem; margin-top:.3rem; }
+.splitnote { color:var(--muted); font-size:.82rem; margin:-.15rem .15rem .75rem; padding-left:.7rem; border-left:3px solid var(--accent); }
+button { background:var(--accent); color:#fff; border:0; border-radius:6px; padding:.6rem 1.2rem; font-size:1rem; cursor:pointer; }
+button:disabled { background:var(--ok); cursor:default; }
+.total { display:flex; justify-content:space-between; font-weight:700; padding:.7rem .85rem; border-top:2px solid var(--line); margin-top:.5rem; }
+
+/* data — self-documenting */
+h2.section { margin:2rem 0 .5rem; padding-bottom:.3rem; border-bottom:2px solid var(--line); }
+pre.json { background:var(--code); border:1px solid var(--line); border-radius:8px; padding:1rem; overflow:auto; font-size:.82rem; font-family: ui-monospace, monospace; }
+.doc h1 { font-size:1.4rem; }
+.doc h2 { font-size:1.15rem; margin-top:1.5rem; }
+.doc h3 { font-size:1rem; color:var(--accent); }
+.doc hr { border:0; border-top:1px solid var(--line); margin:1.5rem 0; }
+.doc blockquote { border-left:3px solid var(--accent); margin:1rem 0; padding:.25rem 1rem; color:var(--muted); font-style:italic; }
+.doc code { background:var(--code); padding:.1rem .35rem; border-radius:4px; font-size:.9em; }

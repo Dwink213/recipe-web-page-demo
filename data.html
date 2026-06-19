@@ -4,28 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Data &amp; Logic — Kata Demo (Advanced)</title>
-  <style>
-    :root { --ink:#2a2320; --accent:#c2410c; --line:#e7ddd1; --muted:#7a6f64; --bg:#fffaf3; --code:#f5efe6; }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family: ui-sans-serif, system-ui, Arial, sans-serif; color:var(--ink); background:var(--bg); line-height:1.6; }
-    main { max-width: 860px; margin:0 auto; padding:2rem 1.5rem; }
-    a.back { color:var(--accent); text-decoration:none; font-size:.9rem; }
-    h1 { margin:.5rem 0 1rem; }
-    h2.section { margin:2rem 0 .5rem; padding-bottom:.3rem; border-bottom:2px solid var(--line); }
-    pre.json { background:var(--code); border:1px solid var(--line); border-radius:8px; padding:1rem; overflow:auto; font-size:.82rem; font-family: ui-monospace, monospace; }
-    .doc h1 { font-size:1.4rem; }
-    .doc h2 { font-size:1.15rem; margin-top:1.5rem; }
-    .doc h3 { font-size:1rem; color:var(--accent); }
-    .doc hr { border:0; border-top:1px solid var(--line); margin:1.5rem 0; }
-    .doc blockquote { border-left:3px solid var(--accent); margin:1rem 0; padding:.25rem 1rem; color:var(--muted); font-style:italic; }
-    .doc code { background:var(--code); padding:.1rem .35rem; border-radius:4px; font-size:.9em; }
-    nav { margin-top:2rem; padding-top:1rem; border-top:1px solid var(--line); font-size:.9rem; }
-    nav a { color:var(--accent); }
-    .error { color:#b91c1c; }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <main>
+  <main class="wide">
     <a class="back" href="index.html">&larr; All recipes</a>
     <h1>Data &amp; conversion logic</h1>
     <p>The machine-readable data the app runs on, and the human-readable logic behind every conversion — side by side.</p>
@@ -43,9 +25,8 @@
   </main>
 
   <script type="module">
-    // Minimal, dependency-free Markdown -> HTML. Covers exactly what
-    // conversion-logic.md uses: headings, hr, blockquote, lists, **bold**,
-    // `code`, and paragraphs. Keeps Page 3 zero-dependency (no CDN over file://).
+    // Minimal, dependency-free Markdown -> HTML for conversion-logic.md:
+    // headings, hr, blockquote, lists, **bold**, `code`, paragraphs.
     function mdToHtml(md) {
       const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
       const inline = s => esc(s)
