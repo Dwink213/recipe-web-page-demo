@@ -12,15 +12,15 @@
     WHAT:     Landing page — the recipe list (the kata's required deliverable).
     DISPLAYS: every recipe title + serving count, each a link to its ingredients.
     DATA:     fetches data/recipes.json at runtime.
-    IN  (linked from): — (entry point)
-    OUT (links to):    ingredients.html (per recipe), data.html
+    IN  (linked from): ingredients.html, order.html, data.html (all "back" here)
+    OUT (links to):    ingredients.html (per recipe), order.html, data.html
     MODULES:  none
   -->
   <main>
     <h1>Recipes</h1>
     <p class="sub">Stored as JSON in the repo, fetched at runtime. Click a recipe to see its ingredients.</p>
     <ul class="recipes" id="list"></ul>
-    <nav>Advanced: <a href="data.html">data &amp; conversion logic</a></nav>
+    <nav>Advanced (beyond the brief): <a href="order.html">build an order</a> &middot; <a href="data.html">data &amp; conversion logic</a></nav>
   </main>
 
   <script type="module">

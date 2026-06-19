@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json.schemas.azureedge.net/staticwebapp.config.json",
+  "routes": [
+    { "route": "/docs/*", "statusCode": 404 }
+  ]
+}

@@ -29,6 +29,7 @@ from there.
 | `js/parse.js` | Parses raw ingredient strings into `{amount, unit, name, note, flags}`; preserves the raw string. |
 | `js/convert.js` | Scales, joins to procurement by name, and builds priced order lines. |
 | `styles.css` | One shared stylesheet for every page (static asset, fetched once). |
+| `staticwebapp.config.json` | Routing config — returns 404 for `/docs/*` so the dev docs aren't served on the live site. No SPA fallback (the app is multi-page). |
 | `.github/workflows/deploy.yml` | Deploys to Azure SWA on push to `main`; PRs get a staging environment, closed on PR close. |
 | `.github/workflows/ci.yml` | Validation gate — runs `scripts/ci_checks.py` on pushes and PRs. |
 | `scripts/ci_checks.py` | Checks `index.html` exists and isn't empty, scans for leaked secrets, and enforces the kata data rules (`check_data_meets_kata_rules`). |
