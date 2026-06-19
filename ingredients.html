@@ -3,20 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ingredients — Kata Demo</title>
+  <title>Recipe — Kata Demo</title>
   <style>
-    :root { --ink:#2a2320; --accent:#c2410c; --line:#e7ddd1; --muted:#7a6f64; --bg:#fffaf3; --flag:#9a3412; --flagbg:#fde7d6; }
+    :root { --ink:#2a2320; --accent:#c2410c; --line:#e7ddd1; --muted:#7a6f64; --bg:#fffaf3; --accent-soft:#fde7d6; }
     * { box-sizing: border-box; }
     body { margin:0; font-family: ui-sans-serif, system-ui, Arial, sans-serif; color:var(--ink); background:var(--bg); line-height:1.6; }
-    main { max-width: 680px; margin:0 auto; padding:2rem 1.5rem; }
+    main { max-width: 600px; margin:0 auto; padding:2rem 1.5rem; }
     a.back { color:var(--accent); text-decoration:none; font-size:.9rem; }
-    h1 { margin:.5rem 0 1rem; }
-    table { border-collapse:collapse; width:100%; }
-    th, td { text-align:left; padding:.6rem .5rem; border-bottom:1px solid var(--line); vertical-align:top; }
-    th { font-size:.8rem; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
-    .raw { color:var(--muted); font-size:.85rem; font-family: ui-monospace, monospace; }
-    .flag { display:inline-block; background:var(--flagbg); color:var(--flag); font-size:.72rem; padding:.1rem .45rem; border-radius:4px; margin:.1rem .2rem .1rem 0; }
-    .note { color:var(--muted); font-style:italic; font-size:.85rem; }
+    h1 { margin:.5rem 0 .25rem; }
+    .yield { color:var(--muted); margin:0 0 1.5rem; }
+    h2 { font-size:1rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 .5rem; }
+    ul.ing { list-style:none; padding:0; margin:0; }
+    ul.ing li { padding:.6rem .25rem; border-bottom:1px solid var(--line); }
     nav.adv { margin-top:2rem; padding-top:1rem; border-top:1px solid var(--line); font-size:.9rem; color:var(--muted); }
     nav.adv a { color:var(--accent); }
     .error { color:#b91c1c; }
@@ -31,11 +29,10 @@
   <!--
     "A page listing the ingredients used in the recipe. This page doesn't need
     to have any interactive elements." (Kata brief, bullet 2)
-    Display only: no buttons, inputs, forms, or event handlers — just the listing.
+    A plain listing of the recipe's ingredients — no data-quality flags, no
+    interactive controls. Those live on the advanced order page.
   -->
   <script type="module">
-    import { parseIngredient } from "./js/parse.js";
-
     const content = document.getElementById("content");
     const id = new URLSearchParams(location.search).get("id");
     const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
@@ -47,26 +44,14 @@
       if (!recipe) {
         content.innerHTML = `<p class="error">Recipe not found: ${esc(id ?? "(no id given)")}.</p>`;
       } else {
-        const rows = recipe.ingredients.map((raw) => {
-          const ing = parseIngredient(raw);
-          const flags = ing.flags.map((f) => `<span class="flag">${esc(f)}</span>`).join("");
-          const amount = ing.amount === null ? "—" : `${ing.amount}${ing.unit ?? ""}`;
-          const note = ing.note ? `<div class="note">(${esc(ing.note)})</div>` : "";
-          return `<tr>
-            <td>${esc(ing.name)}${note}${flags ? "<div>" + flags + "</div>" : ""}</td>
-            <td>${amount}</td>
-            <td class="raw">${esc(ing.raw)}</td>
-          </tr>`;
-        }).join("");
-
         const eid = encodeURIComponent(recipe.id);
         content.innerHTML = `
-          <h1>${esc(recipe.title)} — ingredients</h1>
-          <p class="note">Yield: serves ${recipe.yield}</p>
-          <table>
-            <thead><tr><th>Ingredient</th><th>Amount</th><th>As written</th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
+          <h1>${esc(recipe.title)}</h1>
+          <p class="yield">Yield: serves ${recipe.yield}</p>
+          <h2>Ingredients</h2>
+          <ul class="ing">
+            ${recipe.ingredients.map((i) => `<li>${esc(i)}</li>`).join("")}
+          </ul>
           <nav class="adv">
             Advanced (beyond the brief):
             <a href="order.html?id=${eid}">scale &amp; build an order</a>
@@ -74,7 +59,7 @@
           </nav>`;
       }
     } catch (e) {
-      content.innerHTML = `<p class="error">Could not load ingredients: ${esc(e.message)}</p>`;
+      content.innerHTML = `<p class="error">Could not load recipe: ${esc(e.message)}</p>`;
     }
   </script>
 </body>

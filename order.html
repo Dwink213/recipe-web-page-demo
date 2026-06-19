@@ -239,8 +239,8 @@
         <div class="name">${esc(group)} <span class="flag block">NEEDS APPROVAL</span></div>
         <div class="note">Two SKUs in one ${total} g line. Pepper costs far more than salt, so the split is a real cost decision — it must be set by a human, not guessed.</div>
         <div class="resolve">
-          <label>salt <input type="number" id="salt-${esc(group)}" min="0" max="${total}" step="0.1" value="${half}"></label>
-          <label>pepper <span id="pepper-${esc(group)}">${round1(total - half)}</span> g</label>
+          <label>salt <input type="number" class="salt-input" min="0" max="${total}" step="0.1" value="${half}"></label>
+          <label>pepper <span class="pepper-out">${round1(total - half)}</span> g</label>
           <button data-accept="${esc(group)}">Accept split</button>
         </div>
       </div>`;
@@ -269,12 +269,12 @@
       // salt/pepper split editor
       content.querySelectorAll("[data-accept]").forEach((b) => {
         const group = b.dataset.accept;
-        const input = document.getElementById(`salt-${group}`);
-        const pepperSpan = document.getElementById(`pepper-${group}`);
         const card = b.closest("[data-group]");
         const total = Number(card.dataset.total);
+        const input = card.querySelector(".salt-input");
+        const pepperSpan = card.querySelector(".pepper-out");
         input.addEventListener("input", () => {
-          let s = Math.min(total, Math.max(0, Number(input.value) || 0));
+          const s = Math.min(total, Math.max(0, Number(input.value) || 0));
           pepperSpan.textContent = round1(total - s);
         });
         b.addEventListener("click", () => {
