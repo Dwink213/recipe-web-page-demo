@@ -1,0 +1,18 @@
+name: site-validation
+
+# Trimmed validation gate modeled on the AWACS site CI.
+# On pull requests this is a true gate (fails before merge); on direct pushes
+# to main it runs in parallel with deploy.yml and acts as a loud detector.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Site validation gates (page exists, not empty, no leaked secrets)
+        run: python3 scripts/ci_checks.py
