@@ -1,0 +1,42 @@
+[
+  {
+    "id": "chicken-stir-fry",
+    "title": "Chicken Stir-Fry",
+    "yield": 2,
+    "ingredients": [
+      "30g olive oil",
+      "200g chicken breast",
+      "500g broccoli florets",
+      "250g red bell pepper",
+      "60g soy sauce",
+      "10g garlic",
+      "5g ginger"
+    ]
+  },
+  {
+    "id": "veggie-omelette",
+    "title": "Veggie Omelette",
+    "yield": 1,
+    "ingredients": [
+      "100g large eggs",
+      "40g diced onion",
+      "50g diced tomato",
+      "20g spinach leaves",
+      "15g olive oil",
+      "150g small corn tortillas",
+      "3g Salt and pepper (to taste)"
+    ]
+  },
+  {
+    "id": "overnight-oats",
+    "title": "Overnight Oats",
+    "yield": 4,
+    "ingredients": [
+      "160g rolled oats",
+      "1000g almond milk",
+      "70g chia seeds",
+      "60g honey",
+      "300g blueberries"
+    ]
+  }
+]

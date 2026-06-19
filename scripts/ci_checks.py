@@ -7,6 +7,7 @@ single-page static demo. Each check appends human-readable strings to a shared
 
 Run locally with:  python3 scripts/ci_checks.py
 """
+import json
 import re
 import sys
 from pathlib import Path
@@ -60,23 +61,81 @@ def check_no_leaked_secrets(errors):
                 errors.append(f"Possible {label} found in {rel}.")
 
 
-def check_recipe_quality(errors):
-    """OPTIONAL content gate - your design choice.
+def check_data_meets_kata_rules(errors):
+    """Enforce the Kata brief's data rules as a real gate (not just convention).
 
-    This is the one place where what the gate enforces is a real decision rather
-    than boilerplate. Decide what a 'valid' recipe page must contain and assert
-    it here. Returning without appending anything = the check passes.
-
-    Ideas to consider (pick what matters to you):
-      - require an <h1> title so every page has a headline
-      - require an Ingredients section and a Method/Steps section
-      - require a serving size / time so the demo always shows metadata
-    Trade-off: stricter checks catch broken pages earlier, but a too-rigid gate
-    blocks legitimate variations of the template.
+    The brief is the contract. These assertions mirror, in CI, the same rules
+    the order page enforces at runtime, so the data files cannot drift out of
+    compliance through an unreviewed PR. Each rule traces to the brief.
     """
-    # TODO(you): implement 5-10 lines asserting the recipe page's required shape.
-    # Left as a no-op so CI passes until you decide the rules.
-    return
+    data = ROOT / "data"
+    recipes_path, proc_path = data / "recipes.json", data / "procurement.json"
+
+    try:
+        recipes = json.loads(recipes_path.read_text(encoding="utf-8"))
+        procurement = json.loads(proc_path.read_text(encoding="utf-8"))
+    except FileNotFoundError as e:
+        errors.append(f"Required data file missing: {e.filename}")
+        return
+    except json.JSONDecodeError as e:
+        errors.append(f"Data JSON is malformed (the brief warns the source was): {e}")
+        return
+
+    # Rule: recipes is a non-empty list of well-shaped recipes with unique slug ids.
+    if not isinstance(recipes, list) or not recipes:
+        errors.append("recipes.json must be a non-empty list.")
+        recipes = []
+    seen_ids = set()
+    for i, r in enumerate(recipes):
+        where = f"recipes[{i}]"
+        if not isinstance(r.get("id"), str) or not re.fullmatch(r"[a-z0-9-]+", r.get("id", "")):
+            errors.append(f"{where}: 'id' must be a non-empty slug (lowercase, digits, hyphens).")
+        elif r["id"] in seen_ids:
+            errors.append(f"{where}: duplicate id '{r['id']}' — ids must be unique for routing.")
+        else:
+            seen_ids.add(r["id"])
+        if not isinstance(r.get("title"), str) or not r.get("title", "").strip():
+            errors.append(f"{where}: 'title' must be a non-empty string.")
+        if not isinstance(r.get("yield"), (int, float)) or r.get("yield", 0) <= 0:
+            errors.append(f"{where}: 'yield' must be a positive number (scaling divides by it).")
+        ings = r.get("ingredients")
+        if not isinstance(ings, list) or not ings or not all(isinstance(s, str) and s.strip() for s in ings):
+            errors.append(f"{where}: 'ingredients' must be a non-empty list of non-empty strings.")
+
+    # Rule (brief #4): every priced procurement entry is labeled illustrative,
+    # has a known buy unit, and carries the conversion factor that unit needs.
+    valid_units = {"g": "gramsPerUnit", "each": "gramsPerUnit", "ml": "gramsPerMl"}
+    for name, p in procurement.items():
+        if name == "_meta" or not isinstance(p, dict):
+            continue
+        if p.get("bundled"):
+            continue  # bundled entries are validated below, not priced directly
+        unit = p.get("buyUnit")
+        if unit not in valid_units:
+            errors.append(f"procurement['{name}']: buyUnit must be one of g/ml/each, got {unit!r}.")
+            continue
+        if not isinstance(p.get(valid_units[unit]), (int, float)):
+            errors.append(f"procurement['{name}']: '{unit}' unit requires a numeric {valid_units[unit]}.")
+        if not isinstance(p.get("pricePerBuyUnit"), (int, float)):
+            errors.append(f"procurement['{name}']: missing numeric pricePerBuyUnit.")
+        if p.get("priceNote") != "illustrative":
+            errors.append(f"procurement['{name}']: priceNote must be 'illustrative' (brief: never present placeholders as real).")
+
+    # Rule (brief #5): the bundled salt-and-pepper line must be modeled as an
+    # approval-gated split whose targets actually exist. This is the ambiguity
+    # the system must never resolve silently.
+    bundled = procurement.get("salt and pepper")
+    if not isinstance(bundled, dict) or not bundled.get("bundled"):
+        errors.append("procurement['salt and pepper'] must exist and be marked bundled (brief #5).")
+    else:
+        if not bundled.get("requiresApproval"):
+            errors.append("procurement['salt and pepper'] must set requiresApproval: true.")
+        targets = bundled.get("splitInto") or []
+        if not targets:
+            errors.append("procurement['salt and pepper'] must list splitInto targets.")
+        for t in targets:
+            if t not in procurement:
+                errors.append(f"procurement['salt and pepper'] splits into '{t}', but '{t}' has no procurement entry.")
 
 
 def main():
@@ -84,7 +143,7 @@ def main():
     check_index_exists(errors)
     check_index_not_empty(errors)
     check_no_leaked_secrets(errors)
-    check_recipe_quality(errors)
+    check_data_meets_kata_rules(errors)
 
     if errors:
         print("Site validation FAILED:")

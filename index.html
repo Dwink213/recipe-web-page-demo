@@ -3,152 +3,48 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Weeknight Lemon Garlic Pasta — Recipe Demo</title>
-  <meta name="description" content="A rapid web page prototype deployed via CI/CD to Azure Static Web Apps." />
+  <title>Recipes — Kata Demo</title>
   <style>
-    :root {
-      --bg: #fffaf3;
-      --ink: #2a2320;
-      --accent: #c2410c;
-      --accent-soft: #fde7d6;
-      --line: #e7ddd1;
-      --muted: #7a6f64;
-    }
+    :root { --ink:#2a2320; --accent:#c2410c; --line:#e7ddd1; --muted:#7a6f64; --bg:#fffaf3; }
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: ui-serif, Georgia, "Times New Roman", serif;
-      color: var(--ink);
-      background: var(--bg);
-      line-height: 1.6;
-    }
-    header {
-      background: var(--accent-soft);
-      border-bottom: 1px solid var(--line);
-      padding: 3rem 1.5rem 2.5rem;
-      text-align: center;
-    }
-    header .kicker {
-      font-family: ui-sans-serif, system-ui, sans-serif;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      font-size: 0.72rem;
-      color: var(--accent);
-      font-weight: 600;
-    }
-    header h1 {
-      margin: 0.6rem auto 0.4rem;
-      font-size: clamp(1.9rem, 5vw, 2.8rem);
-      max-width: 18ch;
-    }
-    header p.meta {
-      font-family: ui-sans-serif, system-ui, sans-serif;
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin: 0;
-    }
-    main {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 2.5rem 1.5rem 4rem;
-    }
-    .stats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      justify-content: center;
-      list-style: none;
-      padding: 0;
-      margin: 2rem 0;
-      font-family: ui-sans-serif, system-ui, sans-serif;
-    }
-    .stats li {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 0.75rem 1.25rem;
-      text-align: center;
-      min-width: 110px;
-    }
-    .stats .label {
-      display: block;
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-    }
-    .stats .value { font-size: 1.1rem; font-weight: 600; }
-    h2 {
-      font-size: 1.4rem;
-      border-bottom: 2px solid var(--accent-soft);
-      padding-bottom: 0.4rem;
-      margin-top: 2.5rem;
-    }
-    ul.ingredients { padding-left: 1.2rem; }
-    ul.ingredients li { margin-bottom: 0.4rem; }
-    ol.steps { padding-left: 1.3rem; }
-    ol.steps li { margin-bottom: 0.9rem; }
-    footer {
-      border-top: 1px solid var(--line);
-      text-align: center;
-      padding: 2rem 1.5rem;
-      font-family: ui-sans-serif, system-ui, sans-serif;
-      font-size: 0.82rem;
-      color: var(--muted);
-    }
-    footer code {
-      background: var(--accent-soft);
-      padding: 0.1rem 0.4rem;
-      border-radius: 4px;
-      color: var(--accent);
-    }
+    body { margin:0; font-family: ui-sans-serif, system-ui, Arial, sans-serif; color:var(--ink); background:var(--bg); line-height:1.6; }
+    main { max-width: 640px; margin: 0 auto; padding: 2rem 1.5rem; }
+    h1 { margin:0 0 .25rem; }
+    .sub { color: var(--muted); margin: 0 0 2rem; }
+    ul.recipes { list-style:none; padding:0; margin:0; }
+    ul.recipes li { border:1px solid var(--line); border-radius:8px; margin-bottom:.75rem; }
+    ul.recipes a { display:flex; justify-content:space-between; align-items:center; padding:1rem 1.25rem; text-decoration:none; color:var(--ink); font-size:1.1rem; }
+    ul.recipes a:hover { background:#fff; }
+    .yield { color:var(--muted); font-size:.9rem; }
+    nav { margin-top:2.5rem; padding-top:1rem; border-top:1px solid var(--line); font-size:.9rem; }
+    nav a { color:var(--accent); }
+    .error { color:#b91c1c; }
   </style>
 </head>
 <body>
-  <header>
-    <span class="kicker">Recipe Web Page Demo</span>
-    <h1>Weeknight Lemon Garlic Pasta</h1>
-    <p class="meta">Serves 4 &middot; 20 minutes &middot; One pan</p>
-  </header>
-
   <main>
-    <p>
-      A bright, fast pasta for the end of a long day. This page exists to demonstrate a
-      rapid web-page prototype shipped through CI/CD to Azure Static Web Apps &mdash; edit
-      the HTML, push to <strong>main</strong>, and the change is live in about a minute.
-    </p>
-
-    <ul class="stats">
-      <li><span class="label">Prep</span><span class="value">5 min</span></li>
-      <li><span class="label">Cook</span><span class="value">15 min</span></li>
-      <li><span class="label">Serves</span><span class="value">4</span></li>
-    </ul>
-
-    <h2>Ingredients</h2>
-    <ul class="ingredients">
-      <li>340 g spaghetti or linguine</li>
-      <li>4 tbsp olive oil</li>
-      <li>4 cloves garlic, thinly sliced</li>
-      <li>1 lemon &mdash; zest and juice</li>
-      <li>1/2 tsp red pepper flakes</li>
-      <li>40 g parmesan, finely grated, plus more to serve</li>
-      <li>A handful of parsley, chopped</li>
-      <li>Salt and black pepper to taste</li>
-    </ul>
-
-    <h2>Method</h2>
-    <ol class="steps">
-      <li>Boil the pasta in well-salted water until al dente. Reserve a cup of the cooking water before draining.</li>
-      <li>While it cooks, warm the olive oil over medium-low heat and gently fry the garlic and red pepper flakes until fragrant and just golden &mdash; do not let the garlic brown.</li>
-      <li>Add the lemon zest and juice to the pan, then the drained pasta. Toss to coat.</li>
-      <li>Add a splash of the reserved pasta water and the parmesan, tossing until a light glossy sauce forms.</li>
-      <li>Finish with parsley, a crack of black pepper, and extra parmesan. Serve immediately.</li>
-    </ol>
+    <h1>Recipes</h1>
+    <p class="sub">Stored as JSON in the repo, fetched at runtime. Pick one to see its ingredients.</p>
+    <ul class="recipes" id="list"></ul>
+    <nav>
+      Advanced: <a href="data.html">data &amp; conversion logic</a>
+    </nav>
   </main>
 
-  <footer>
-    Deployed via GitHub Actions &rarr; <code>Azure/static-web-apps-deploy@v1</code> &middot;
-    Static Web Apps Free tier
-  </footer>
+  <script type="module">
+    const list = document.getElementById("list");
+    try {
+      const recipes = await (await fetch("data/recipes.json")).json();
+      list.innerHTML = recipes.map(r => `
+        <li>
+          <a href="recipe.html?id=${encodeURIComponent(r.id)}">
+            <span>${r.title}</span>
+            <span class="yield">serves ${r.yield}</span>
+          </a>
+        </li>`).join("");
+    } catch (e) {
+      list.innerHTML = `<li class="error">Could not load recipes: ${e.message}</li>`;
+    }
+  </script>
 </body>
 </html>

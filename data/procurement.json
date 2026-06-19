@@ -1,0 +1,37 @@
+{
+  "_meta": {
+    "note": "All conversions and prices are ILLUSTRATIVE placeholders, not real catalog data. Real values would come from the supplier catalog. Keys are normalized: lowercase, trimmed.",
+    "currency": "USD"
+  },
+
+  "olive oil":        { "buyUnit": "ml",   "gramsPerMl": 0.92, "pricePerBuyUnit": 0.012, "priceNote": "illustrative" },
+  "chicken breast":   { "buyUnit": "g",    "gramsPerUnit": 1,  "pricePerBuyUnit": 0.011, "priceNote": "illustrative" },
+  "broccoli florets": { "buyUnit": "g",    "gramsPerUnit": 1,  "pricePerBuyUnit": 0.004, "priceNote": "illustrative" },
+  "red bell pepper":  { "buyUnit": "each", "gramsPerUnit": 120,"pricePerBuyUnit": 0.70,  "priceNote": "illustrative" },
+  "soy sauce":        { "buyUnit": "ml",   "gramsPerMl": 1.15, "pricePerBuyUnit": 0.006, "priceNote": "illustrative" },
+  "garlic":           { "buyUnit": "each", "gramsPerUnit": 3,  "pricePerBuyUnit": 0.08,  "priceNote": "illustrative", "buyUnitLabel": "clove" },
+  "ginger":           { "buyUnit": "g",    "gramsPerUnit": 1,  "pricePerBuyUnit": 0.009, "priceNote": "illustrative" },
+
+  "large eggs":       { "buyUnit": "each", "gramsPerUnit": 50, "pricePerBuyUnit": 0.25,  "priceNote": "illustrative" },
+  "diced onion":      { "buyUnit": "g",    "gramsPerUnit": 1,  "pricePerBuyUnit": 0.002, "priceNote": "illustrative", "sourceNote": "onions sold by each ~150g; using weight" },
+  "diced tomato":     { "buyUnit": "g",    "gramsPerUnit": 1,  "pricePerBuyUnit": 0.003, "priceNote": "illustrative", "sourceNote": "tomatoes sold by each ~120g; using weight" },
+  "spinach leaves":   { "buyUnit": "g",    "gramsPerUnit": 1,  "pricePerBuyUnit": 0.008, "priceNote": "illustrative" },
+  "small corn tortillas": { "buyUnit": "each", "gramsPerUnit": 30, "pricePerBuyUnit": 0.10, "priceNote": "illustrative" },
+
+  "rolled oats":      { "buyUnit": "g",    "gramsPerUnit": 1,  "pricePerBuyUnit": 0.003, "priceNote": "illustrative" },
+  "almond milk":      { "buyUnit": "ml",   "gramsPerMl": 1.03, "pricePerBuyUnit": 0.002, "priceNote": "illustrative" },
+  "chia seeds":       { "buyUnit": "g",    "gramsPerUnit": 1,  "pricePerBuyUnit": 0.012, "priceNote": "illustrative" },
+  "honey":            { "buyUnit": "g",    "gramsPerUnit": 1,  "pricePerBuyUnit": 0.007, "priceNote": "illustrative" },
+  "blueberries":      { "buyUnit": "g",    "gramsPerUnit": 1,  "pricePerBuyUnit": 0.010, "priceNote": "illustrative" },
+
+  "salt": { "buyUnit": "g", "gramsPerUnit": 1, "pricePerBuyUnit": 0.0005, "priceNote": "illustrative" },
+  "pepper": { "buyUnit": "g", "gramsPerUnit": 1, "pricePerBuyUnit": 0.018, "priceNote": "illustrative" },
+
+  "salt and pepper": {
+    "bundled": true,
+    "splitInto": ["salt", "pepper"],
+    "defaultSplit": "even-by-weight",
+    "requiresApproval": true,
+    "note": "Ambiguous: two distinct SKUs in one recipe line. Even split is a neutral placeholder, NOT a recommendation. Pepper costs far more than salt, so a wrong split is a real cost error. Must be approved by a human before ordering."
+  }
+}

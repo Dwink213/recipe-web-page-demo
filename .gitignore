@@ -141,3 +141,10 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Python (ci_checks.py)
+__pycache__/
+*.pyc
+
+# Interview/assessment source material — keep local, never publish (public repo)
+_intake/
