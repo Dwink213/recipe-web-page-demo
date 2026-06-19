@@ -4,53 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Order — Kata Demo (Advanced)</title>
-  <style>
-    :root { --ink:#2a2320; --accent:#c2410c; --line:#e7ddd1; --muted:#7a6f64; --bg:#fffaf3;
-            --flag:#9a3412; --flagbg:#fde7d6; --ok:#15803d; --okbg:#dcfce7;
-            --pending:#92400e; --pendingbg:#fef3c7; --block:#b91c1c; --blockbg:#fee2e2; }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family: ui-sans-serif, system-ui, Arial, sans-serif; color:var(--ink); background:var(--bg); line-height:1.55; }
-    main { max-width: 820px; margin:0 auto; padding:2rem 1.5rem; }
-    a.back { color:var(--accent); text-decoration:none; font-size:.9rem; }
-    h1 { margin:.5rem 0 .25rem; }
-    .meta { color:var(--muted); margin:0 0 1rem; }
-    .controls { display:flex; gap:.75rem; align-items:center; margin:1rem 0 1.25rem; flex-wrap:wrap; }
-    .controls input { width:5rem; padding:.35rem .5rem; font-size:1rem; }
-    .status { display:inline-block; padding:.2rem .7rem; border-radius:999px; font-size:.8rem; font-weight:700; letter-spacing:.03em; }
-    .status.pending { background:var(--pendingbg); color:var(--pending); }
-    .status.approved { background:var(--okbg); color:var(--ok); }
-    .banner { padding:.75rem 1rem; border-radius:8px; margin:1rem 0; font-size:.9rem; }
-    .banner.pending { background:var(--pendingbg); color:var(--pending); border:1px solid #fcd34d; }
-    .banner.approved { background:var(--okbg); color:var(--ok); border:1px solid #86efac; }
-
-    .line { display:flex; justify-content:space-between; gap:1rem; align-items:flex-start;
-            padding:.7rem .85rem; border:1px solid var(--line); border-radius:8px; margin-bottom:.55rem; background:#fff; }
-    .line.blocked { border-color:#fca5a5; background:var(--blockbg); }
-    .line.settled { border-color:#bbf7d0; background:#f6fdf8; }
-    .line .name { font-weight:600; }
-    .line .nums { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; color:var(--muted); font-size:.9rem; }
-    .line .nums .cost { color:var(--ink); font-weight:600; }
-    .note { color:var(--muted); font-style:italic; font-size:.85rem; }
-    .illustrative { color:var(--muted); font-size:.72rem; }
-    .flag { display:inline-block; background:var(--flagbg); color:var(--flag); font-size:.7rem; padding:.08rem .45rem; border-radius:4px; margin:.15rem .2rem 0 0; }
-    .flag.block { background:var(--blockbg); color:var(--block); font-weight:700; }
-    .resolve { margin-top:.55rem; display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; font-size:.85rem; }
-    .resolve input { width:4rem; padding:.2rem .35rem; }
-    .resolved-note { color:var(--ok); font-size:.82rem; font-weight:600; margin-top:.35rem; }
-
-    button { background:var(--accent); color:#fff; border:0; border-radius:6px; padding:.4rem .85rem; font-size:.9rem; cursor:pointer; }
-    button.ghost { background:#fff; color:var(--accent); border:1px solid var(--accent); }
-    button.danger { background:#fff; color:var(--block); border:1px solid #fca5a5; }
-    button.approve { padding:.6rem 1.2rem; font-size:1rem; }
-    button:disabled { background:#d6ccbf; color:#fff; cursor:not-allowed; border-color:#d6ccbf; }
-
-    .total { display:flex; justify-content:space-between; font-weight:700; padding:.7rem .85rem; border-top:2px solid var(--line); margin-top:.5rem; }
-    nav { margin-top:2rem; padding-top:1rem; border-top:1px solid var(--line); font-size:.9rem; }
-    nav a { color:var(--accent); }
-    .error { color:#b91c1c; }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!--
+    PAGE:     order.html  (advanced — beyond the kata brief)
+    WHAT:     Order builder for one recipe — scale, convert to procurement units,
+              price (illustrative), with editable ambiguous lines and an Approve step.
+    DISPLAYS: servings control, one card per order line (salt/pepper split shown
+              with a caption), a running total, and pending/approved status.
+    DATA:     fetches data/recipes.json + data/procurement.json (reads ?id= and
+              optional ?servings= from the URL).
+    IN  (linked from): ingredients.html
+    OUT (links to):    index.html (back), ingredients.html, data.html
+    MODULES:  js/convert.js (buildOrder, convertToBuyUnit)
+  -->
   <main>
     <a class="back" href="index.html">&larr; All recipes</a>
     <div id="content"></div>
@@ -58,20 +26,14 @@
 
   <script type="module">
     import { buildOrder, convertToBuyUnit } from "./js/convert.js";
-    import { canApprove, unresolvedCount, isBlocking, flagSeverity } from "./js/rules.js";
 
     const content = document.getElementById("content");
     const params = new URLSearchParams(location.search);
     const id = params.get("id");
 
-    let recipe, procurement;
-
-    // Resolution state — wiped whenever the order changes (servings edit), so a
-    // changed order can never inherit a stale approval.
+    let recipe, procurement, order;
     let approved = false;
-    let resolved = new Set();   // line ids a human acknowledged / kept
-    let excluded = new Set();   // line ids a human removed from the order
-    let splits = {};            // bundle group -> { role: grams }  (human-chosen split)
+    const overrides = {}; // line id -> human-set grams
 
     try {
       [recipe, procurement] = await Promise.all([
@@ -85,15 +47,34 @@
     const money = (n) => "$" + n.toFixed(2);
     const round1 = (n) => Math.round(n * 10) / 10;
     const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
-    const isSettled = (lineId) => resolved.has(lineId) || excluded.has(lineId);
 
-    function resetResolution() { approved = false; resolved = new Set(); excluded = new Set(); splits = {}; }
+    // A line is adjustable if it's part of a split (salt/pepper) or carries any
+    // data-quality flag — i.e. anything ambiguous a human might want to correct.
+    const editable = (l) => !!l.bundle || (l.flags && l.flags.length > 0);
 
-    function priceFromGrams(grams, p) {
-      if (!p || grams === null) return { qty: null, label: null, cost: null };
-      const qty = convertToBuyUnit(grams, p);
-      return { qty, label: p.buyUnitLabel || p.buyUnit, cost: qty * p.pricePerBuyUnit };
+    // WHAT: recompute a line's buy-unit quantity and cost from its current grams.
+    // WHY:  editing an ambiguous line must reprice it live; the conversion math
+    //       itself stays in convert.js (convertToBuyUnit) — this only re-applies it.
+    function reprice(l) {
+      const p = procurement[l.name];
+      if (!p) { l.qty = undefined; l.lineCost = undefined; return; }
+      l.qty = convertToBuyUnit(l.grams, p);
+      l.buyUnitLabel = p.buyUnitLabel || p.buyUnit;
+      l.lineCost = l.qty * p.pricePerBuyUnit;
     }
+
+    // WHAT: the right-hand numbers cell for a line: scaled grams -> qty -> cost.
+    // WHY:  rendered on first paint and again on every live edit, so it's one fn.
+    function numsHtml(l) {
+      if (l.qty !== undefined && l.qty !== null) {
+        return `${round1(l.grams)} g &rarr; ${l.qty} ${esc(l.buyUnitLabel)}<br>` +
+               `<span class="cost">${money(l.lineCost)}</span> <span class="illustrative">illus.</span>`;
+      }
+      return l.grams !== null ? round1(l.grams) + " g" : "—";
+    }
+
+    // WHAT/WHY: sum every line's cost for the order total (skips unpriced lines).
+    const totalNow = () => order.lines.reduce((s, l) => s + (l.lineCost || 0), 0);
 
     if (!recipe) {
       content.innerHTML = `<p class="error">Recipe not found: ${esc(id ?? "(no id given)")}.</p>`;
@@ -101,39 +82,47 @@
       render(Number(params.get("servings")) || recipe.yield);
     }
 
+    // WHAT: render one order-line card; ambiguous lines get an editable grams input.
+    // WHY:  the user can correct an ambiguous amount (salt/pepper) inline; normal
+    //       lines are display-only. The input is hidden once the order is approved.
+    function lineCard(l) {
+      const note = l.note ? `<div class="note">(${esc(l.note)})</div>` : "";
+      const editor = editable(l) && !approved
+        ? `<div><input class="qty-edit" type="number" min="0" step="0.1" data-idx="${l.id}" value="${round1(l.grams)}"> g</div>`
+        : "";
+      return `<div class="line">
+        <div><div class="name">${esc(l.name)}</div>${note}${editor}</div>
+        <div class="nums" data-idx="${l.id}">${numsHtml(l)}</div>
+      </div>`;
+    }
+
+    // WHAT: build the order at this serving count, paint the page, and wire the
+    //       servings control, Approve button, and per-line live-edit inputs.
+    // WHY:  a single render path keeps state (overrides, approved) and the DOM in
+    //       sync; edits update in place afterward so inputs don't lose focus.
     function render(servings) {
-      const order = buildOrder(recipe, servings, procurement);
-      order.lines.forEach((l, i) => { l.id = i; });
+      order = buildOrder(recipe, servings, procurement);
+      order.lines.forEach((l, i) => {
+        l.id = i;
+        if (overrides[i] != null) { l.grams = overrides[i]; reprice(l); }
+      });
 
-      // Apply any human-chosen salt/pepper split: override grams and reprice.
-      for (const l of order.lines) {
-        if (l.bundle && splits[l.bundle.group]) {
-          const g = splits[l.bundle.group][l.bundle.role];
-          l.grams = g;
-          const pr = priceFromGrams(g, procurement[l.name]);
-          l.qty = pr.qty; l.buyUnitLabel = pr.label; l.lineCost = pr.cost;
-        }
-      }
-
-      const blockersLeft = unresolvedCount(order.lines, isSettled);
-      const approvable = canApprove(order.lines, isSettled);
-      const total = order.lines.filter((l) => !excluded.has(l.id))
-                               .reduce((s, l) => s + (l.lineCost || 0), 0);
-
-      // Render lines; bundled pairs collapse into one adjustable card.
       const renderedGroups = new Set();
       const cards = order.lines.map((l) => {
         if (l.bundle) {
           if (renderedGroups.has(l.bundle.group)) return "";
           renderedGroups.add(l.bundle.group);
-          return bundleCard(order.lines, l.bundle.group);
+          const parts = order.lines.filter((x) => x.bundle && x.bundle.group === l.bundle.group);
+          return parts.map(lineCard).join("") +
+            `<p class="splitnote">Split from “${esc(l.bundle.group)}”. Salt and pepper cost very differently
+             and the kitchen doesn’t treat them as equal, so they’re separate lines — adjust either amount above.</p>`;
         }
         return lineCard(l);
       }).join("");
 
       content.innerHTML = `
         <h1>${esc(recipe.title)} — order</h1>
-        <p class="meta">Base yield serves ${recipe.yield}. Scale factor ${order.scale.toFixed(2)}×. Prices are illustrative.</p>
+        <p class="meta">Base yield serves ${recipe.yield}. Scale factor ${order.scale.toFixed(2)}×. Prices illustrative; adjust ambiguous lines.</p>
 
         <div class="controls">
           <label>Servings: <input id="servings" type="number" min="1" step="1" value="${servings}" ${approved ? "disabled" : ""}></label>
@@ -142,158 +131,52 @@
 
         <div class="banner ${approved ? "approved" : "pending"}">
           ${approved
-            ? "Order approved. Every flagged line was resolved by a human before approval."
-            : blockersLeft > 0
-              ? `<strong>${blockersLeft} flagged line(s) need a decision before this order can be approved.</strong> Nothing is ordered until then.`
-              : "All flagged lines resolved. You can approve the order."}
+            ? "Order approved by a human."
+            : "Review and adjust the order below, then approve. Nothing is ordered until you approve."}
         </div>
 
         ${cards}
 
         <div class="total">
           <span>Total <span class="illustrative">(illustrative)</span></span>
-          <span>${money(total)}</span>
+          <span id="grand-total">${money(totalNow())}</span>
         </div>
 
         <p style="margin-top:1.25rem">
-          <button class="approve" id="approve" ${approved || !approvable ? "disabled" : ""}>
-            ${approved ? "✓ Approved" : approvable ? "Approve Order" : `Resolve ${blockersLeft} line(s) to approve`}
-          </button>
+          <button id="approve" ${approved ? "disabled" : ""}>${approved ? "✓ Approved" : "Approve Order"}</button>
         </p>
 
         <nav>
-          <a href="recipe.html?id=${encodeURIComponent(recipe.id)}">&larr; recipe detail</a>
+          <a href="ingredients.html?id=${encodeURIComponent(recipe.id)}">&larr; ingredients</a>
           &middot; <a href="data.html">data &amp; conversion logic</a>
         </nav>`;
 
-      attachHandlers(servings, order);
-    }
-
-    function flagChips(flags) {
-      return flags.map((f) => `<span class="flag ${flagSeverity(f) === "blocker" ? "block" : ""}">${esc(f)}</span>`).join("");
-    }
-
-    function lineCard(l) {
-      const settled = isSettled(l.id);
-      const blocking = isBlocking(l.flags);
-      const cls = excluded.has(l.id) ? "settled" : blocking && !settled ? "blocked" : settled ? "settled" : "";
-      const note = l.note ? `<div class="note">(${esc(l.note)})</div>` : "";
-
-      let nums;
-      if (excluded.has(l.id)) {
-        nums = `<span class="cost">excluded</span>`;
-      } else if (l.qty !== undefined && l.qty !== null) {
-        nums = `${round1(l.grams)} g &rarr; ${l.qty} ${esc(l.buyUnitLabel)}<br><span class="cost">${money(l.lineCost)}</span> <span class="illustrative">illus.</span>`;
-      } else {
-        nums = `${l.grams !== null ? round1(l.grams) + " g" : "—"}`;
-      }
-
-      let controls = "";
-      if (approved) {
-        // read-only after approval
-      } else if (excluded.has(l.id)) {
-        controls = `<div class="resolve"><span class="resolved-note">✓ excluded from order</span> <button class="ghost" data-undo="${l.id}">Undo</button></div>`;
-      } else if (resolved.has(l.id)) {
-        controls = `<div class="resolved-note">✓ reviewed &amp; kept</div>`;
-      } else if (blocking) {
-        controls = `<div class="resolve">
-          <span>This line needs a human decision:</span>
-          <button class="ghost" data-ack="${l.id}">Reviewed — keep</button>
-          <button class="danger" data-exclude="${l.id}">Exclude from order</button>
-        </div>`;
-      }
-
-      return `<div class="line ${cls}">
-        <div><div class="name">${esc(l.name)}</div>${note}<div>${flagChips(l.flags)}</div>${controls}</div>
-        <div class="nums">${nums}</div>
-      </div>`;
-    }
-
-    function bundleCard(lines, group) {
-      const parts = lines.filter((l) => l.bundle && l.bundle.group === group);
-      const total = parts[0].bundle.totalGrams;
-      const accepted = !!splits[group];
-      const settled = parts.every((l) => resolved.has(l.id));
-
-      const subline = (l) => {
-        const pr = priceFromGrams(l.grams, procurement[l.name]);
-        return `<div style="display:flex;justify-content:space-between;margin:.2rem 0;">
-          <span>${esc(l.name)}</span>
-          <span class="nums">${round1(l.grams)} g &rarr; <span class="cost">${money(pr.cost ?? 0)}</span> <span class="illustrative">illus.</span></span>
-        </div>`;
-      };
-
-      if (accepted) {
-        const undo = approved ? "" : `<button class="ghost" data-adjust="${group}">Adjust split</button>`;
-        return `<div class="line settled" style="display:block">
-          <div class="name">${esc(group)} — split accepted</div>
-          <div class="note">Even split is only a default; this split was chosen by a human.</div>
-          ${parts.map(subline).join("")}
-          <div class="resolved-note">✓ split approved ${undo}</div>
-        </div>`;
-      }
-
-      const salt = parts.find((l) => l.bundle.role === "salt");
-      const half = round1(total / 2);
-      return `<div class="line blocked" style="display:block" data-group="${esc(group)}" data-total="${total}">
-        <div class="name">${esc(group)} <span class="flag block">NEEDS APPROVAL</span></div>
-        <div class="note">Two SKUs in one ${total} g line. Pepper costs far more than salt, so the split is a real cost decision — it must be set by a human, not guessed.</div>
-        <div class="resolve">
-          <label>salt <input type="number" id="salt-${esc(group)}" min="0" max="${total}" step="0.1" value="${half}"></label>
-          <label>pepper <span id="pepper-${esc(group)}">${round1(total - half)}</span> g</label>
-          <button data-accept="${esc(group)}">Accept split</button>
-        </div>
-      </div>`;
-    }
-
-    function attachHandlers(servings, order) {
-      const sInput = document.getElementById("servings");
-      if (sInput) sInput.addEventListener("change", (e) => {
+      // Servings change rebuilds the order and clears edits + approval.
+      document.getElementById("servings").addEventListener("change", (e) => {
         const v = Math.max(1, Math.floor(Number(e.target.value) || recipe.yield));
-        resetResolution();
+        for (const k in overrides) delete overrides[k];
+        approved = false;
         render(v);
       });
+      document.getElementById("approve").addEventListener("click", () => { approved = true; render(servings); });
 
-      const approveBtn = document.getElementById("approve");
-      if (approveBtn) approveBtn.addEventListener("click", () => {
-        if (canApprove(order.lines, isSettled)) { approved = true; render(servings); }
-      });
-
-      content.querySelectorAll("[data-ack]").forEach((b) =>
-        b.addEventListener("click", () => { resolved.add(Number(b.dataset.ack)); render(servings); }));
-      content.querySelectorAll("[data-exclude]").forEach((b) =>
-        b.addEventListener("click", () => { excluded.add(Number(b.dataset.exclude)); render(servings); }));
-      content.querySelectorAll("[data-undo]").forEach((b) =>
-        b.addEventListener("click", () => { excluded.delete(Number(b.dataset.undo)); render(servings); }));
-
-      // salt/pepper split editor
-      content.querySelectorAll("[data-accept]").forEach((b) => {
-        const group = b.dataset.accept;
-        const input = document.getElementById(`salt-${group}`);
-        const pepperSpan = document.getElementById(`pepper-${group}`);
-        const card = b.closest("[data-group]");
-        const total = Number(card.dataset.total);
-        input.addEventListener("input", () => {
-          let s = Math.min(total, Math.max(0, Number(input.value) || 0));
-          pepperSpan.textContent = round1(total - s);
-        });
-        b.addEventListener("click", () => {
-          const s = Math.min(total, Math.max(0, Number(input.value) || 0));
-          splits[group] = { salt: round1(s), pepper: round1(total - s) };
-          order.lines.filter((l) => l.bundle && l.bundle.group === group)
-                     .forEach((l) => resolved.add(l.id));
-          render(servings);
+      // WHAT: live-edit a line's grams — reprice that line and the total in place,
+      //       without re-rendering, so the input keeps focus.
+      // WHY:  edits are intentionally independent; salt and pepper are NOT
+      //       reconciled back to the original bundled weight (illustrative demo).
+      content.querySelectorAll(".qty-edit").forEach((inp) => {
+        inp.addEventListener("input", () => {
+          const idx = Number(inp.dataset.idx);
+          const g = Math.max(0, Number(inp.value) || 0);
+          overrides[idx] = g;
+          const l = order.lines[idx];
+          l.grams = g; reprice(l);
+          const cell = content.querySelector(`.nums[data-idx="${idx}"]`);
+          if (cell) cell.innerHTML = numsHtml(l);
+          const tot = document.getElementById("grand-total");
+          if (tot) tot.textContent = money(totalNow());
         });
       });
-
-      content.querySelectorAll("[data-adjust]").forEach((b) =>
-        b.addEventListener("click", () => {
-          const group = b.dataset.adjust;
-          delete splits[group];
-          order.lines.filter((l) => l.bundle && l.bundle.group === group)
-                     .forEach((l) => resolved.delete(l.id));
-          render(servings);
-        }));
     }
   </script>
 </body>

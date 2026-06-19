@@ -6,7 +6,10 @@
 // value can be audited against what was actually written.
 
 /**
- * Parse a single raw ingredient string into a structured object.
+ * WHAT: Parse one raw ingredient string into {raw, amount, unit, name, note, flags}.
+ * WHY:  The recipe JSON keeps ingredients exactly as written; computing on them
+ *       needs structure. Unparseable input is flagged, never thrown, so a dirty
+ *       meal plan can't crash the page.
  * @param {string} raw e.g. "100g large eggs" or "3g Salt and pepper (to taste)"
  * @returns {{raw:string, amount:number|null, unit:string|null, name:string, note:string|null, flags:string[]}}
  */
@@ -44,20 +47,4 @@ export function parseIngredient(raw) {
   if (amount === null || Number.isNaN(amount)) flags.push("no quantity, review");
 
   return { raw, amount, unit, name, note, flags };
-}
-
-/**
- * Parse every ingredient on a recipe and join each to the procurement table.
- * A missing procurement match adds a flag; it never throws.
- * @param {{ingredients:string[]}} recipe
- * @param {Record<string, any>} procurement
- */
-export function parseRecipeIngredients(recipe, procurement = {}) {
-  return recipe.ingredients.map((raw) => {
-    const ing = parseIngredient(raw);
-    if (procurement[ing.name] === undefined) {
-      ing.flags = [...ing.flags, "no procurement mapping, review"];
-    }
-    return ing;
-  });
 }
