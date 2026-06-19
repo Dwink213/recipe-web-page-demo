@@ -34,18 +34,14 @@ export function buildOrder(recipe, targetServings, procurement) {
     const grams = ing.amount * scale;
     const p = procurement[ing.name];
 
-    // Bundled (salt and pepper): split into two suggested lines, even by weight,
-    // each flagged and gated behind approval. The split is a placeholder, never
-    // a recommendation.
+    // Bundled (salt and pepper): split into two clean lines, even by weight,
+    // each priced on its own. They are shown with a note explaining the split —
+    // salt and pepper cost very differently, so the kitchen orders them
+    // separately. No interactive approval on these lines.
     if (p && p.bundled) {
       for (const half of p.splitInto) {
-        const line = makeLine(half, grams / 2, procurement[half], ing.note, [
-          ...baseFlags,
-          "suggested even-split placeholder, NEEDS APPROVAL",
-        ]);
-        // Tag the split so the order page can regroup the pair into one
-        // adjustable, approval-gated control. The even split is the default,
-        // never the decision.
+        const line = makeLine(half, grams / 2, procurement[half], ing.note, []);
+        // Tag the split so the order page can group the pair and caption it.
         line.bundle = { group: ing.name, role: half, totalGrams: grams };
         lines.push(line);
       }

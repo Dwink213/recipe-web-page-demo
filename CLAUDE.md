@@ -17,16 +17,15 @@ Four pages at the repo root, two ES modules in `/js`, three data files in `/data
 
 Pages — clicking a recipe goes **straight to its ingredients** (no middle page); the advanced pages are linked from there, not required:
 - `index.html` — recipe list (the graded deliverable). Fetches `data/recipes.json`, links each title straight to `ingredients.html?id=`.
-- `ingredients.html` — "the page for the recipe": lists the ingredients used in the recipe. Reads `?id=`, parses each ingredient with `parse.js`, shows parsed name/amount next to the original `raw` and flags, and links to the advanced pages. **No interactive elements** in the listing (no button/input/form/handler) — that constraint is load-bearing; keep the listing display-only (plain nav `<a>`s are fine). There is intentionally no separate recipe-hub page.
-- `order.html` — (advanced) scale to target servings, convert to procurement units, illustrative pricing, and a client-side **approval gate**. Re-scaling resets approval.
+- `ingredients.html` — "the page for the recipe": a **plain list** of the recipe's ingredients (the raw strings), title, and yield, plus links to the advanced pages. Deliberately simple — no data-quality flags, no parser artifacts. **No interactive elements** in the listing (no button/input/form/handler) — that constraint is load-bearing; keep it display-only (plain nav `<a>`s are fine). There is intentionally no separate recipe-hub page.
+- `order.html` — (advanced) scale to target servings, convert to procurement units, illustrative pricing, and a simple pending→**approved** gate (re-scaling resets it). The `salt and pepper` line is shown as two even-split lines (salt, pepper) with a caption explaining the split — they cost very differently, so the kitchen orders them separately. No interactive split editor.
 - `data.html` — (advanced) pretty-prints both JSON files and renders `data/conversion-logic.md` via a tiny inline markdown function (zero CDN dependencies).
 
 Modules (`/js`, faithful to the pseudocode in `_intake/01_build-spec.md`):
 - `parse.js` — `parseIngredient(raw)` turns `"100g large eggs"` into `{raw, amount, unit, name, note, flags}`. Always preserves `raw`; never throws.
-- `convert.js` — `buildOrder(recipe, targetServings, procurement)` scales, joins to procurement by normalized name, and builds order lines. `convertToBuyUnit` rounds `each` up (no fractional eggs), `ml` to 0.1, `g` as-is.
-- `rules.js` — the brief's logic as **enforceable** rules. Classifies each flag `blocker` vs `info`; `canApprove(lines, isSettled)` returns false while any blocker is unresolved. This is the seam that makes the brief a rule, not a label — `order.html`'s Approve button is gated on it, and a flagged line (salt/pepper split, unmappable item) must be resolved by a human first. See `docs/kata-rules.md` for the rule→enforcement map.
+- `convert.js` — `buildOrder(recipe, targetServings, procurement)` scales, joins to procurement by normalized name, and builds order lines. `convertToBuyUnit` rounds `each` up (no fractional eggs), `ml` to 0.1, `g` as-is. The bundled `salt and pepper` line splits into two even-by-weight lines tagged `bundle` so `order.html` can caption them.
 
-**The brief is the contract.** When changing app behavior, treat `_intake/00_kata-brief.md` + `_intake/01_build-spec.md` as binding and keep `docs/kata-rules.md` (and the CI gate that mirrors it) in sync. Don't downgrade an enforced rule back into a display-only flag.
+**The brief is the contract.** When changing app behavior, treat `_intake/00_kata-brief.md` + `_intake/01_build-spec.md` as binding and keep `docs/kata-rules.md` in sync. The brief's *data* rules (illustrative pricing, bundled salt/pepper modeling, recipe shape) are enforced at the repo boundary by `scripts/ci_checks.py` (`check_data_meets_kata_rules`), which fails a non-compliant PR before deploy.
 
 **Data join contract:** ingredients join to `procurement.json` by the lowercased, trimmed `name`. A missing match adds a `"no procurement mapping, review"` flag — it never throws. Flags are *additive* across `parse.js` and `convert.js`; they mark unresolved ambiguity, not every transformation.
 

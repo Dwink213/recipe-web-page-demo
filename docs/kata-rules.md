@@ -13,18 +13,16 @@ or refuses when the rule is violated.
 | R4 | Recipe units ≠ procurement units; conversion modeled once, keyed by name. | `js/convert.js` + `data/procurement.json` |
 | R5 | Countables (eggs, tortillas, peppers) are ordered by the each, rounded up — no fractional units. | `convertToBuyUnit` (`ceil` for `each`) |
 | R6 | Illustrative prices/conversions are labeled everywhere; never presented as real catalog data. | `priceNote: "illustrative"` rendered in UI; **CI fails** if any priced entry isn't labeled |
-| R7 | The bundled `salt and pepper` line is ambiguous: split, even-weight placeholder, flagged, gated behind approval; never committed as fact. | `convert.js` split + `js/rules.js` blocker + `order.html` editor; **CI fails** if the bundle/targets are missing |
-| R8 | Nothing is "ordered" until a human approves. A flagged line must be resolved first. | `js/rules.js` `canApprove()` gates `order.html`'s Approve button |
-| R9 | A changed order cannot inherit a stale approval. | `order.html` resets resolution state on any servings change |
+| R7 | The bundled `salt and pepper` line is split into two even-by-weight lines, priced separately, shown with a note on why (they cost very differently); never merged as one SKU. | `convert.js` split into `salt`/`pepper` lines + `order.html` caption; **CI fails** if the bundle/targets are missing |
+| R8 | Nothing is "ordered" until a human approves. | `order.html` pending→approved gate (Approve button) |
+| R9 | A changed order cannot inherit a stale approval. | `order.html` resets `approved` on any servings change |
 | R10 | Recipe/price changes are reviewable: every data change flows through a PR and a checked gate. | `scripts/ci_checks.py` `check_data_meets_kata_rules()` runs in `.github/workflows/ci.yml` |
 
-## The enforcement seam
+## Where the rules hold at the repo boundary
 
-`js/rules.js` classifies every flag as `blocker` or `info`. A `blocker` makes
-`canApprove()` return `false`, so the order page's approved state is **unreachable**
-until a human resolves the line (accept a salt/pepper split, exclude an unmappable
-item, or explicitly acknowledge it). This is the difference between a flag that
-*describes* doubt and a rule that *prevents* committing through it.
-
-The same data rules (R6, R7, and recipe shape) are mirrored in Python so they hold
-at the repo boundary too: a PR that breaks them fails CI before it can deploy.
+The brief's *data* rules (R6 illustrative labeling, R7 bundled salt/pepper modeling,
+and recipe shape) are mirrored in Python — `scripts/ci_checks.py`
+`check_data_meets_kata_rules()` — so a PR that breaks them fails CI before it can
+deploy. The order page is intentionally simple: it scales, converts, prices, shows
+the salt/pepper split with an explanatory note, and requires one human Approve
+before the order reads as placed.
