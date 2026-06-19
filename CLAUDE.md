@@ -15,10 +15,9 @@ A static, multi-page recipe app (vanilla HTML + ES-module JavaScript, no build s
 
 Four pages at the repo root, two ES modules in `/js`, three data files in `/data`. Pages link to each other with normal `<a>` and query strings (`recipe.html?id=chicken-stir-fry`) — no SPA router, no client-side routing.
 
-Pages — the required flow matches the brief's two bullets *literally* (list → recipe page → ingredients page); the advanced pages are linked, not required:
-- `index.html` — recipe list (the graded deliverable). Fetches `data/recipes.json`, links each title to `recipe.html` ("the page for the recipe").
-- `recipe.html` — the recipe's page. Reads `?id=`, shows title + yield, links to its ingredients page and to the advanced pages. Deliberately thin so the literal page boundary in the brief is honored.
-- `ingredients.html` — "a page listing the ingredients used in the recipe" (brief bullet 2). Reads `?id=`, parses each ingredient with `parse.js`, shows parsed name/amount next to the original `raw` and flags. **No interactive elements** (no button/input/form/handler) — that constraint is load-bearing; keep it display-only.
+Pages — clicking a recipe goes **straight to its ingredients** (no middle page); the advanced pages are linked from there, not required:
+- `index.html` — recipe list (the graded deliverable). Fetches `data/recipes.json`, links each title straight to `ingredients.html?id=`.
+- `ingredients.html` — "the page for the recipe": lists the ingredients used in the recipe. Reads `?id=`, parses each ingredient with `parse.js`, shows parsed name/amount next to the original `raw` and flags, and links to the advanced pages. **No interactive elements** in the listing (no button/input/form/handler) — that constraint is load-bearing; keep the listing display-only (plain nav `<a>`s are fine). There is intentionally no separate recipe-hub page.
 - `order.html` — (advanced) scale to target servings, convert to procurement units, illustrative pricing, and a client-side **approval gate**. Re-scaling resets approval.
 - `data.html` — (advanced) pretty-prints both JSON files and renders `data/conversion-logic.md` via a tiny inline markdown function (zero CDN dependencies).
 

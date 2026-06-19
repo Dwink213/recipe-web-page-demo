@@ -17,6 +17,8 @@
     .raw { color:var(--muted); font-size:.85rem; font-family: ui-monospace, monospace; }
     .flag { display:inline-block; background:var(--flagbg); color:var(--flag); font-size:.72rem; padding:.1rem .45rem; border-radius:4px; margin:.1rem .2rem .1rem 0; }
     .note { color:var(--muted); font-style:italic; font-size:.85rem; }
+    nav.adv { margin-top:2rem; padding-top:1rem; border-top:1px solid var(--line); font-size:.9rem; color:var(--muted); }
+    nav.adv a { color:var(--accent); }
     .error { color:#b91c1c; }
   </style>
 </head>
@@ -57,13 +59,19 @@
           </tr>`;
         }).join("");
 
+        const eid = encodeURIComponent(recipe.id);
         content.innerHTML = `
-          <p><a class="back" href="recipe.html?id=${encodeURIComponent(recipe.id)}">&larr; ${esc(recipe.title)}</a></p>
           <h1>${esc(recipe.title)} — ingredients</h1>
+          <p class="note">Yield: serves ${recipe.yield}</p>
           <table>
             <thead><tr><th>Ingredient</th><th>Amount</th><th>As written</th></tr></thead>
             <tbody>${rows}</tbody>
-          </table>`;
+          </table>
+          <nav class="adv">
+            Advanced (beyond the brief):
+            <a href="order.html?id=${eid}">scale &amp; build an order</a>
+            &middot; <a href="data.html">data &amp; conversion logic</a>
+          </nav>`;
       }
     } catch (e) {
       content.innerHTML = `<p class="error">Could not load ingredients: ${esc(e.message)}</p>`;

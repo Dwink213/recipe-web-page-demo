@@ -24,7 +24,7 @@
 <body>
   <main>
     <h1>Recipes</h1>
-    <p class="sub">Stored as JSON in the repo, fetched at runtime. Pick one to see its ingredients.</p>
+    <p class="sub">Stored as JSON in the repo, fetched at runtime. Click a recipe to see its ingredients.</p>
     <ul class="recipes" id="list"></ul>
     <nav>
       Advanced: <a href="data.html">data &amp; conversion logic</a>
@@ -37,7 +37,7 @@
       const recipes = await (await fetch("data/recipes.json")).json();
       list.innerHTML = recipes.map(r => `
         <li>
-          <a href="recipe.html?id=${encodeURIComponent(r.id)}">
+          <a href="ingredients.html?id=${encodeURIComponent(r.id)}">
             <span>${r.title}</span>
             <span class="yield">serves ${r.yield}</span>
           </a>

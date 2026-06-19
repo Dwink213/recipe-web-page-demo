@@ -7,8 +7,8 @@ or refuses when the rule is violated.
 
 | # | Rule (from the brief) | Enforced by |
 |---|---|---|
-| R1 | A page lists all recipes from the back end; clicking one routes to "the page for the recipe". | `index.html` → `recipe.html?id=` |
-| R2 | A separate page lists the ingredients used in the recipe; **no interactive elements**. | `recipe.html` → `ingredients.html?id=` — display only (no button/input/form/handler) |
+| R1 | A page lists all recipes from the back end; clicking one goes straight to "the page for the recipe". | `index.html` → `ingredients.html?id=` (no middle page) |
+| R2 | That page lists the ingredients used in the recipe; **no interactive elements** in the listing. | `ingredients.html` — display only (no button/input/form/handler) |
 | R3 | Input is untrusted: ingredient strings are parsed, never silently "fixed"; the raw string is preserved. | `js/parse.js` (carries `raw`, never throws) |
 | R4 | Recipe units ≠ procurement units; conversion modeled once, keyed by name. | `js/convert.js` + `data/procurement.json` |
 | R5 | Countables (eggs, tortillas, peppers) are ordered by the each, rounded up — no fractional units. | `convertToBuyUnit` (`ceil` for `each`) |
