@@ -1,6 +1,7 @@
 {
   "$schema": "https://json.schemas.azureedge.net/staticwebapp.config.json",
   "routes": [
-    { "route": "/docs/*", "statusCode": 404 }
+    { "route": "/docs/*", "statusCode": 404 },
+    { "route": "/daily-captures/*", "statusCode": 404 }
   ]
 }
