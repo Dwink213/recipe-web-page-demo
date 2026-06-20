@@ -1,160 +1,131 @@
 # Brutal Project Critique & Improvement Plan
 
-_Audit date: 2026-06-19. Scope: full repo — math, breadcrumbs, simplicity, docs._
+_Final-check pass: 2026-06-19. Scope: whole repo, as it will be handed to interviewers._
 
 ## Executive Summary
 
-The **math is sound** and the **architecture is appropriately simple** — a static,
-no-build, repo-as-data-store app. Every conversion, price, and total was verified
-computationally across all three recipes and is internally consistent; all
-cross-page links resolve. The project's real failure is **documentation rot**: six
-iterations changed behavior, and the prose that describes that behavior was not
-kept in lockstep. The single most serious issue is that **`conversion-logic.md`,
-which is rendered live on Page 3 as the app's "self-documenting" view, now
-describes a system that no longer exists** (it claims salt/pepper are flagged
-"NEEDS APPROVAL" and gated — that machinery was deleted). A self-documenting page
-that misdescribes itself is worse than no documentation, because it's presented as
-authoritative to the interviewer.
+This is the **second** brutal pass. The first found clean math but rotted
+documentation ("code B+, docs D"). That gap is closed: the docs now match the code,
+every page has a header comment and every function a WHAT/WHY, the breadcrumb trails
+are complete and verified against the real link graph, the README is rewritten for
+the actual app with two render-verified diagrams and an honest evolution timeline,
+and `data.html` carries a hand-authored SVG site map.
 
-Health: **code B+, documentation D.** None of the critical issues are math or
-logic; all are truth-in-documentation. They are cheap to fix and high-impact.
+**Verdict: interview-ready. No critical or high issues remain.** Everything below is
+polish — the kind of thing a fair critic still names but that wouldn't embarrass the
+author in front of an interviewer. The single most defensible gap is the missing
+`LICENSE` on a public repo. Verified this pass: all five README live links return
+200 on production; the data-flow diagram's worked example (`100g eggs → 2`) is
+correct; no leftover `TODO`/`FIXME`; the README file tree matches the tracked files;
+no secrets or PII in any tracked file.
 
 ## Critical Issues (Fix Immediately)
 
-1. **Page 3 lies about the system.** `data/conversion-logic.md` §5/§6 and the
-   say-out-loud summary describe salt/pepper as "flagged and marked NEEDS
-   APPROVAL," "Suggested and flagged lines are visibly marked," and "require human
-   approval before it can be ordered [for the split]." The code (`convert.js`
-   line 43 passes `flags: []`; `rules.js` was deleted) no longer does any of this.
-   This renders on the live site.
-2. **`README.md` describes a different app.** It says "A single static HTML page
-   (`index.html`)" and its file table omits `ingredients.html`, `order.html`,
-   `data.html`, `/data`, `/js`, `styles.css`, `parse.js`, `convert.js`. Point #6
-   references `check_recipe_quality()` — a function that was **renamed/replaced**
-   by `check_data_meets_kata_rules()` and is no longer a no-op.
+None. (Stated plainly because the job of a final check is to say so when it's true,
+not to manufacture severity.)
 
 ## Dimension Analysis
 
 ### 1. STRUCTURE
 
-#### High Priority
-- **Issue:** `CLAUDE.md` contradicts itself. The updated section correctly cites
-  `check_data_meets_kata_rules()`, but the older "Things that will bite you" bullet
-  (line ~54) still says `check_recipe_quality()` is "an intentional no-op with a
-  TODO." One of these is false.
-  - **Fix:** Delete/replace the stale bullet; point it at the real CI gate.
-  - **Priority:** HIGH **Effort:** 10 min
-  - **Fixer Prompt:** The no-op became a real gate three changes ago — should the
-    "bite you" list now warn that the gate *fails the build* on bad data, instead
-    of inviting someone to implement a TODO that's already done?
-
 #### Medium Priority
-- **Issue:** `order.html` still carries flag machinery (`baseFlags`,
-  `"no procurement mapping, review"`, `"no quantity, cannot scale, review"`,
-  `editable()` testing `l.flags.length`) that no current recipe can trigger — every
-  ingredient maps and parses. It's defensive but it's untested surface area in a
-  file you want "as simple as possible."
-  - **Fix:** Either (a) keep it and add a one-line comment that it's defensive for
-    future data, or (b) strip the unreachable branches. Recommend (a) — it's cheap
-    insurance and the brief warned the input was dirty.
-  - **Priority:** MEDIUM **Effort:** 15 min
-  - **Fixer Prompt:** Do we expect future recipes with unmapped ingredients? If
-    yes, keep the no-mapping path and test it with a deliberately-unmapped fixture;
-    if no, delete it and let `convert.js` be the only place that reasons about flags.
+- **Issue:** No `LICENSE` file. This is a public repo being handed to interviewers;
+  the absence leaves reuse rights undefined and reads as an unfinished edge.
+  - **Fix:** Add an MIT `LICENSE` (or your preference) with your name and 2026.
+  - **Priority:** MEDIUM **Effort:** 2 min
+  - **Fixer Prompt:** MIT is the safe portfolio default — any reason to prefer
+    Apache-2.0 (patent grant) or "all rights reserved"? If unsure, MIT.
+
+#### Low Priority
+- **Issue:** `order.html` and `convert.js` carry flag branches (`no procurement
+  mapping`, `no quantity, cannot scale`) that no current recipe can trigger — every
+  ingredient maps and parses. Defensive, but it's untested surface in the most
+  complex file.
+  - **Fix:** Keep it (the brief warned the input was dirty) but it's already
+    commented; optionally add a fixture recipe with an unmapped ingredient so the
+    path is exercised, or leave as documented dead-ish defense.
+  - **Priority:** LOW **Effort:** 20 min if exercised
+  - **Fixer Prompt:** Do you want to demo the "unmapped ingredient → flagged, not
+    crashed" behavior live? If yes, add a fixture; if not, the comment is enough.
 
 ### 2. USEFULNESS
 
 #### Verified Clean
-- **Math:** scaling (`targetServings / yield`), `convertToBuyUnit` (`ceil` for
-  each, round-0.1 for ml, identity for g), per-line cost, and totals all recompute
-  correctly. Garlic 10g→4 cloves (`ceil(10/3)`), bell pepper 250g→3 each
-  (`ceil(250/120)`), olive oil 30g→32.6 ml all correct.
-- **Edge handling:** unparseable strings and missing quantities are flagged, not
-  thrown; missing procurement mapping is flagged, not thrown. Good.
+- All conversion math, pricing, and totals recompute correctly (re-verified this
+  pass). Edge cases handled without throwing: unparseable strings, missing
+  quantities, no-`id` on order (picker) and ingredients (graceful link). All live
+  links 200.
 
-#### Medium Priority
-- **Issue:** The order-page total includes salt+pepper but a deliberately edited
-  "0 g" line is allowed (clamps to ≥0). That's fine, but there's no guard that the
-  salt+pepper edited grams still sum to the original line weight — a user can set
-  both to 0 or both high. Per the simplification that's acceptable (illustrative),
-  but it's worth a comment so nobody mistakes it for an enforced invariant.
-  - **Fix:** One-line comment in `order.html` that edited amounts are independent
-    and intentionally NOT reconciled to the source weight.
-  - **Priority:** MEDIUM **Effort:** 5 min
-  - **Fixer Prompt:** Is independent salt/pepper editing the intent (yes, per the
-    last decision), or should the two re-balance against the 6 g source line?
+#### Low Priority
+- **Issue:** Editable salt/pepper amounts are independent and not reconciled to the
+  source line weight (you can set both to 0). Intentional per the last decision, and
+  now commented — noting it only so a reviewer doesn't mistake it for a bug.
+  - **Fix:** None needed; the inline comment covers it.
+  - **Priority:** LOW **Effort:** 0
+  - **Fixer Prompt:** Leave as-is unless an interviewer asks "shouldn't those sum to
+    the original?" — then it's a 2-line clamp.
 
-### 3. AESTHETICS (code quality & docs)
+### 3. AESTHETICS
 
-#### Critical
-- **Issue:** No file has a header comment describing what the page is and its
-  inbound/outbound links; function-level comments are inconsistent (some JSDoc,
-  some none). This is the documentation standard the owner asked for.
-  - **Fix:** Apply `docs/STYLE_GUIDE.md` to every file: page header block (WHAT /
-    DISPLAYS / DATA / IN / OUT / MODULES) and a WHAT+WHY on every function.
-  - **Priority:** CRITICAL (explicit ask) **Effort:** 1.5–2 h (parallelizable)
-  - **Fixer Prompt:** Apply the STYLE_GUIDE header to all four pages + both JS
-    modules + the Python gate; one agent per file, then a consistency pass.
-
-#### High Priority
-- **Issue:** `convert.js` file header (lines 1–7) contradicts its own code: "surface
-  every ambiguity as a flag … bundled lines split into a flagged placeholder that
-  requires approval." Bundled lines are no longer flagged and nothing requires
-  approval in this module.
-  - **Fix:** Rewrite the banner to match: bundled lines split even-by-weight into
-    two clean priced lines; the order page captions them.
-  - **Priority:** HIGH **Effort:** 10 min
-  - **Fixer Prompt:** Same rewrite the moment the behavior changed — should the
-    banner now say the module *never* flags bundles, only splits + prices them?
+#### Low Priority
+- **Issue:** The README's **structure** Mermaid diagram is visually busy (crossing
+  fetch arrows) — the hand-authored SVG on `data.html` says the same thing more
+  cleanly. Two diagrams of the same graph, one tangled.
+  - **Fix:** Either simplify the README Mermaid (drop the fetch edges, keep page
+    nav + the data-flow diagram), or replace it with a link/reference to the SVG.
+  - **Priority:** LOW **Effort:** 15 min
+  - **Fixer Prompt:** Is the README Mermaid earning its space next to the cleaner
+    SVG, or should it be the simple nav-only version with the data flow shown once?
 
 ### 4. END-USER FRIENDLINESS
 
-#### Medium Priority
-- **Issue:** Decision docs form a supersession chain but only forward. A reader
-  landing on `enforce-kata-brief-as-rules.md` or `split-recipe-and-ingredients-
-  pages.md` has no signal those decisions were reversed.
-  - **Fix:** Add a top `> Superseded by <file> (date).` line to each reversed doc
-    (standard now codified in `STYLE_GUIDE.md`).
-  - **Priority:** MEDIUM **Effort:** 10 min
-  - **Fixer Prompt:** Want superseded decisions kept (with a back-reference) for
-    the audit trail, or collapsed into a single current-state decision log?
+#### Low Priority
+- **Issue:** The README lists internal Azure topology (resource group, subscription
+  name). Harmless for a throwaway demo, but it's detail an interviewer doesn't need
+  and a habit worth not forming.
+  - **Fix:** Optional — trim to "Azure Static Web Apps, Free SKU" without the RG /
+    subscription name.
+  - **Priority:** LOW **Effort:** 2 min
+  - **Fixer Prompt:** Keep the resource names as proof it's really deployed, or trim
+    for tidiness? Your call — both are defensible.
+- **Issue:** 11 commits carry a personal `Claude-Session: https://claude.ai/...`
+  trailer. The `Co-Authored-By: Claude` line is good method-transparency; the
+  session URL is a dead personal link that adds nothing for a reader.
+  - **Fix:** Leave it (removing means a history rewrite + force-push, not worth the
+    risk on a repo you're about to hand over). Just be aware it's there.
+  - **Priority:** LOW **Effort:** N/A (don't rewrite history pre-interview)
+  - **Fixer Prompt:** Only worth touching if you were starting the repo fresh — not
+    now.
 
 ## Quick Wins (High Impact, Low Effort)
 
-1. Rewrite `data/conversion-logic.md` §5/§6/summary to match the current
-   split-and-caption behavior (CRITICAL, ~20 min, fixes the live Page 3).
-2. Rewrite `README.md` to the 4-page app + correct the `ci_checks.py` description
-   and the dead `check_recipe_quality()` reference (CRITICAL, ~20 min).
-3. Fix the `convert.js` banner and the `CLAUDE.md` self-contradiction (HIGH, ~20 min).
+1. Add a `LICENSE` (MIT). 2 minutes; closes the only non-polish gap.
 
 ## Strategic Improvements (Foundational)
 
-1. Adopt `docs/STYLE_GUIDE.md` as the standard; apply page headers + WHAT/WHY
-   function comments everywhere (the owner's core ask).
-2. Add the breadcrumb-discipline rule to the PR habit: behavior change ⇒ update
-   conversion-logic.md / README / CLAUDE.md / kata-rules.md in the same PR. (A CI
-   check could later assert, e.g., that `conversion-logic.md` doesn't contain
-   "NEEDS APPROVAL" while `convert.js` emits no such flag — a doc/code drift gate.)
+None outstanding. The breadcrumb-discipline practice (behavior change ⇒ update the
+docs that describe it, in the same change) is now encoded in `docs/STYLE_GUIDE.md`
+and `CLAUDE.md`; that's the foundational thing, and it's done.
 
 ## Implementation Roadmap
 
-### Phase 1: Critical truth fixes (now)
-- conversion-logic.md, README.md to match reality; convert.js banner; CLAUDE.md
-  contradiction.
+### Phase 1: Before handing it over
+- Add `LICENSE`. Optionally trim Azure topology in the README.
 
-### Phase 2: Documentation standard (this session)
-- Apply STYLE_GUIDE page headers + function WHAT/WHY to all pages, JS, Python.
-- Add superseded back-references to reversed decision docs.
+### Phase 2: Only if asked / time permits
+- Simplify the README structure Mermaid; add an unmapped-ingredient fixture.
 
-### Phase 3: Drift prevention (optional)
-- A lightweight doc/code-drift check in `ci_checks.py`.
+### Phase 3: N/A
+- Nothing load-bearing remains.
 
 ## Positive Aspects Worth Preserving
 
-- The math layer (`parse.js` / `convert.js`) is clean, single-responsibility, and
-  correct; the conversion table lives in one place and can't drift.
-- The static, no-build, repo-as-data-store architecture is the right call for this
-  demo and deploys in ~1 minute.
-- The CI data gate (`check_data_meets_kata_rules`) genuinely fails on bad data —
-  verified with a negative test.
-- Cross-page navigation is consistent and correct in both directions.
+- **The process is the portfolio.** `docs/decisions/` (dated, with supersession
+  back-references), `docs/kata-rules.md` (rule → enforcement), `docs/STYLE_GUIDE.md`,
+  and this critique itself show disciplined, self-correcting work — rare in a kata.
+- **Math lives in one place** (`convert.js`) and is correct; the conversion table
+  can't drift.
+- **Real CI gate** that fails on bad data (negative-tested), not a rubber stamp.
+- **Honest documentation** that now matches the code, including the live Page 3.
+- **Clean separation:** data / logic / pages / process docs, no framework, deploys
+  in ~1 minute. Appropriate restraint for the problem.
