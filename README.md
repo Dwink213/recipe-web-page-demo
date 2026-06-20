@@ -77,7 +77,7 @@ ingredients.html         # ingredients for one recipe (required)
 order.html               # advanced: scale · convert · price · approve
 data.html                # advanced: raw JSON + rendered conversion logic
 styles.css               # one shared stylesheet
-staticwebapp.config.json # routing (404s /docs/* so dev docs aren't served live)
+staticwebapp.config.json # routing (404s /docs/* and /daily-captures/* off the live site)
 data/                    # the "back end", fetched at runtime
   recipes.json           #   cleaned meal plan (ingredient strings preserved)
   procurement.json       #   unit conversions + illustrative prices
@@ -92,6 +92,7 @@ docs/                    # process artifacts (see "How it was built")
   STYLE_GUIDE.md         #   the documentation standard used here
   Brutal_Improvements.md #   a self-critique pass and its fixes
   decisions/             #   dated decision records for each pivot
+daily-captures/          # end-of-session retrospectives (decisions, pivots, lessons)
 .github/workflows/       # CI gate + Azure SWA deploy
 CLAUDE.md                # architecture map / maintainer notes
 ```
@@ -152,6 +153,17 @@ The artifacts that show the process are intentionally kept in the repo:
 `docs/decisions/` (the reasoning), `docs/kata-rules.md` (rule → enforcement map),
 `docs/STYLE_GUIDE.md` (the standard every file follows), and `CLAUDE.md` (the
 architecture map the AI and I both worked from).
+
+### Session captures (`daily-captures/`)
+
+End-of-session retrospectives — one set per work session — recording what was
+decided, what was *reversed*, what went wrong, and the transferable lesson. They're
+the methodology *behind* the build, written as it happened rather than reconstructed
+afterward, and they're part of a longer-running practice of capturing how
+AI-assisted work actually goes (including the dead ends — see the over-engineered
+salt/pepper editor that got deleted, and a verification step that was wrong until it
+was caught). The `*_methodology.md` file is the session's full story. Kept in the
+repo for transparency; not served on the live site (`/daily-captures/*` → 404).
 
 ### Evolution
 
