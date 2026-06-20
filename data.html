@@ -23,6 +23,107 @@
     <h1>Data &amp; conversion logic</h1>
     <p>The machine-readable data the app runs on, and the human-readable logic behind every conversion — side by side.</p>
 
+    <h2 class="section">Site structure</h2>
+    <figure style="margin:0 0 1.5rem;">
+      <!-- Hand-authored vector site map. data.html (this page) is marked "you are here". -->
+      <svg viewBox="0 0 780 400" style="width:100%;height:auto;display:block"
+           xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="Site structure: four pages navigate to each other; the order page uses the /js modules, which read the /data back end; this page renders conversion-logic.md.">
+        <style>
+          .band { font: 700 11px ui-sans-serif, system-ui, Arial; fill: #7a6f64; letter-spacing: .08em; }
+          .ttl  { font: 600 13px ui-sans-serif, system-ui, Arial; fill: #2a2320; }
+          .ttlw { font: 600 13px ui-sans-serif, system-ui, Arial; fill: #ffffff; }
+          .sub  { font: 11px ui-sans-serif, system-ui, Arial; fill: #7a6f64; }
+          .subw { font: 11px ui-sans-serif, system-ui, Arial; fill: #fde7d6; }
+          .elbl { font: 10px ui-sans-serif, system-ui, Arial; fill: #7a6f64; }
+          .tag  { font: 700 9px ui-sans-serif, system-ui, Arial; fill: #ffffff; letter-spacing: .06em; }
+          .nav   { stroke: #c2410c; stroke-width: 1.6; fill: none; }
+          .fetch { stroke: #b9ab99; stroke-width: 1.3; stroke-dasharray: 4 3; fill: none; }
+          .pg    { fill: #fff; stroke: #c2410c; stroke-width: 1.5; }
+          .here  { fill: #c2410c; stroke: #a8380a; stroke-width: 1.5; }
+          .infra { fill: #fff; stroke: #cdbfae; stroke-width: 1.5; }
+        </style>
+        <defs>
+          <marker id="navhead" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L7,3 L0,6 Z" fill="#c2410c"/></marker>
+          <marker id="fhead" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L7,3 L0,6 Z" fill="#b9ab99"/></marker>
+        </defs>
+
+        <!-- band labels -->
+        <text class="band" x="18" y="40">PAGES</text>
+        <text class="band" x="18" y="170">/js — LOGIC</text>
+        <text class="band" x="18" y="294">/data — BACK END</text>
+
+        <!-- navigation arrows (pages) -->
+        <path class="nav" d="M184,71 L218,71" marker-end="url(#navhead)"/>
+        <text class="elbl" x="201" y="65" text-anchor="middle">click</text>
+        <path class="nav" d="M374,71 L408,71" marker-end="url(#navhead)"/>
+        <text class="elbl" x="391" y="65" text-anchor="middle">scale</text>
+        <path class="nav" d="M524,71 L562,71" marker-end="url(#navhead)"/>
+        <text class="elbl" x="543" y="65" text-anchor="middle">adv.</text>
+
+        <!-- PAGES row -->
+        <rect class="pg"   x="66"  y="46" width="118" height="50" rx="8"/>
+        <text class="ttl"  x="125" y="70" text-anchor="middle">index.html</text>
+        <text class="sub"  x="125" y="86" text-anchor="middle">recipe list</text>
+
+        <rect class="pg"   x="224" y="46" width="150" height="50" rx="8"/>
+        <text class="ttl"  x="299" y="70" text-anchor="middle">ingredients.html</text>
+        <text class="sub"  x="299" y="86" text-anchor="middle">ingredients</text>
+
+        <rect class="pg"   x="414" y="46" width="110" height="50" rx="8"/>
+        <text class="ttl"  x="469" y="70" text-anchor="middle">order.html</text>
+        <text class="sub"  x="469" y="86" text-anchor="middle">scale · price</text>
+
+        <rect class="here" x="566" y="46" width="150" height="50" rx="8"/>
+        <text class="ttlw" x="641" y="69" text-anchor="middle">data.html</text>
+        <text class="subw" x="641" y="85" text-anchor="middle">you are here</text>
+
+        <!-- order -> convert.js (uses) -->
+        <path class="nav" d="M469,96 L469,170" marker-end="url(#navhead)"/>
+        <text class="elbl" x="478" y="136" text-anchor="start">uses</text>
+
+        <!-- /js row -->
+        <rect class="infra" x="224" y="170" width="120" height="48" rx="8"/>
+        <text class="ttl"  x="284" y="192" text-anchor="middle">parse.js</text>
+        <text class="sub"  x="284" y="207" text-anchor="middle">string → struct</text>
+
+        <rect class="infra" x="394" y="170" width="150" height="48" rx="8"/>
+        <text class="ttl"  x="469" y="192" text-anchor="middle">convert.js</text>
+        <text class="sub"  x="469" y="207" text-anchor="middle">scale + price</text>
+
+        <!-- convert.js -> parse.js (imports) -->
+        <path class="nav" d="M394,194 L348,194" marker-end="url(#navhead)"/>
+        <text class="elbl" x="371" y="188" text-anchor="middle">imports</text>
+
+        <!-- /data row -->
+        <rect class="infra" x="66"  y="296" width="150" height="48" rx="8"/>
+        <text class="ttl"  x="141" y="324" text-anchor="middle">recipes.json</text>
+
+        <rect class="infra" x="250" y="296" width="172" height="48" rx="8"/>
+        <text class="ttl"  x="336" y="324" text-anchor="middle">procurement.json</text>
+
+        <rect class="infra" x="456" y="296" width="200" height="48" rx="8"/>
+        <text class="ttl"  x="556" y="324" text-anchor="middle">conversion-logic.md</text>
+
+        <!-- convert.js reads the data files -->
+        <path class="fetch" d="M430,218 L170,294" marker-end="url(#fhead)"/>
+        <text class="elbl" x="250" y="252" text-anchor="middle">reads</text>
+        <path class="fetch" d="M469,218 L360,294" marker-end="url(#fhead)"/>
+        <text class="elbl" x="430" y="258" text-anchor="middle">joins</text>
+
+        <!-- data.html renders conversion-logic.md (the point of this page) -->
+        <path class="fetch" d="M641,96 C742,150 742,250 588,294" marker-end="url(#fhead)"/>
+        <text class="elbl" x="726" y="198" text-anchor="middle">renders</text>
+      </svg>
+      <figcaption class="sub" style="margin-top:.5rem">
+        Four static pages navigate by plain links. The order page calls the <code>/js</code> modules, which
+        read the <code>/data</code> back end. This page renders <code>conversion-logic.md</code> below.
+        Every page also links back to the recipe list.
+      </figcaption>
+    </figure>
+
     <h2 class="section">recipes.json</h2>
     <pre class="json" id="recipes">loading…</pre>
 
